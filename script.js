@@ -663,7 +663,7 @@ function createCelestialParticles() {
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
         size: Math.random() * 1.8 + 0.25,
-        speed: Math.random() * 0.018 + 0.004,
+        speed: Math.random() * 0.5,
         alpha: Math.random() * 0.65 + 0.25,
         twinkle: Math.random() * Math.PI * 2,
     }));
@@ -686,14 +686,16 @@ function drawCelestialCanvas() {
 
     celestialCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-    const offsetX =
-        (celestialPointer.x - window.innerWidth / 2) / window.innerWidth;
-    const offsetY =
-        (celestialPointer.y - window.innerHeight / 2) / window.innerHeight;
+    // Gerakan mengikuti cursor — sama seperti background pada ZIP.
+    // Semakin jauh cursor dari tengah layar, semakin kuat galaksi bergeser.
+    const cursorShiftX =
+        (celestialPointer.x - window.innerWidth / 2) * 0.05;
+    const cursorShiftY =
+        (celestialPointer.y - window.innerHeight / 2) * 0.05;
 
     celestialStars.forEach((star) => {
-        star.x -= offsetX * star.speed * 10;
-        star.y -= offsetY * star.speed * 10;
+        star.x -= cursorShiftX * star.speed;
+        star.y -= cursorShiftY * star.speed;
         star.twinkle += 0.025;
 
         if (star.x < -5) star.x = window.innerWidth + 5;
