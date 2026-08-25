@@ -3,49 +3,87 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Typing Speed Tester Pro</title>
-        <!-- Google Fonts: Inter & JetBrains Mono -->
+        <title>TypeSprint Ultimate - Speed & Rhythm</title>
+        <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap"
             rel="stylesheet"
         />
-        <!-- File CSS -->
+        <!-- Style CSS -->
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <div class="container">
-            <!-- Header Aplikasi & High Score -->
+        <div class="container" id="app-container">
+            <!-- TOP NAVIGATION & CONTROLS -->
             <header class="header">
                 <div class="header-top">
-                    <h1>⚡ TypeSprint Pro</h1>
-                    <!-- Tombol Toggle Suara Suara Mechanical Keyboard -->
-                    <button
-                        id="sound-btn"
-                        class="icon-btn"
-                        title="Toggle Suara Ketikan"
-                    >
-                        🔊 <span id="sound-status">ON</span>
-                    </button>
-                </div>
-                <p>Uji kecepatan dan akurasi mengetikmu secara real-time!</p>
+                    <div class="brand">
+                        <h1>⚡ TypeSprint <span>ULTIMATE</span></h1>
+                    </div>
 
-                <!-- Badge High Score dari LocalStorage -->
-                <div class="high-score-badge">
-                    🏆 Rekor Terbaik: <span id="high-score-value">0</span> WPM
+                    <div class="top-actions">
+                        <!-- Tombol Buka Pengaturan Suara -->
+                        <button
+                            id="audio-settings-btn"
+                            class="pill-btn"
+                            title="Pengaturan Suara"
+                        >
+                            🔊
+                            <span id="current-sound-label"
+                                >Blue Switch (80%)</span
+                            >
+                        </button>
+
+                        <!-- Rekor Tertinggi -->
+                        <div class="high-score-badge">
+                            🏆 <span id="high-score-value">0</span> WPM
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOOLBAR: PILIH BAHASA & DURASI WAKTU -->
+                <div class="toolbar">
+                    <!-- Pilihan Bahasa -->
+                    <div class="segmented-control">
+                        <span class="toolbar-label">Bahasa:</span>
+                        <button class="lang-btn active" data-lang="id">
+                            🇮🇩 Indo
+                        </button>
+                        <button class="lang-btn" data-lang="en">
+                            🇬🇧 English
+                        </button>
+                    </div>
+
+                    <!-- Pilihan Durasi -->
+                    <div class="segmented-control">
+                        <span class="toolbar-label">Waktu:</span>
+                        <button class="time-btn" data-time="15">15s</button>
+                        <button class="time-btn" data-time="30">30s</button>
+                        <button class="time-btn active" data-time="60">
+                            60s
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            <!-- Toolbar Pengaturan Durasi Waktu -->
-            <div class="time-selector">
-                <span class="selector-label">Durasi Waktu:</span>
-                <button class="time-btn" data-time="15">15s</button>
-                <button class="time-btn" data-time="30">30s</button>
-                <button class="time-btn active" data-time="60">60s</button>
+            <!-- INOVASI: COMBO STREAK BAR (ARCADE GAMING EFFECT) -->
+            <div class="combo-container" id="combo-container">
+                <div class="combo-info">
+                    <span class="combo-text" id="combo-text"
+                        >🔥 STREAK: <b id="combo-count">0</b></span
+                    >
+                    <span class="combo-multiplier" id="combo-multiplier"
+                        >1x</span
+                    >
+                </div>
+                <div class="combo-progress-bg">
+                    <div class="combo-progress-bar" id="combo-bar"></div>
+                </div>
             </div>
 
-            <!-- Scoreboard / Papan Statistik Realtime -->
+            <!-- STATS CARD -->
             <div class="stats-card">
                 <div class="stat-item">
                     <span class="stat-label">Sisa Waktu</span>
@@ -69,7 +107,7 @@
                 </div>
             </div>
 
-            <!-- Area Teks Uji Coba -->
+            <!-- TYPING BOX -->
             <div class="typing-box" id="typing-box">
                 <input
                     type="text"
@@ -83,15 +121,82 @@
                 <p id="text-display" class="text-display"></p>
             </div>
 
-            <!-- Tombol Kontrol / Aksi -->
+            <!-- CONTROLS -->
             <div class="controls">
                 <button id="restart-btn" class="btn-restart">
-                    🔄 Coba Lagi / Reset
+                    🔄 Reset / Ganti Teks
                 </button>
             </div>
         </div>
 
-        <!-- MODAL / POPUP HASIL AKHIR (GAME OVER) -->
+        <!-- =========================================================
+       MODAL PENGATURAN SUARA (AUDIO STUDIO)
+       ========================================================= -->
+        <div class="modal-overlay" id="audio-modal">
+            <div class="modal-card audio-settings-card">
+                <div class="modal-header">
+                    <h3>🎛️ Audio & Switch Studio</h3>
+                    <p class="modal-subtitle">
+                        Atur profil suara ketikan dan volume sesukamu
+                    </p>
+                </div>
+
+                <div class="audio-options">
+                    <!-- Master Toggle -->
+                    <div class="setting-row">
+                        <label for="sound-toggle">Suara Keyboard:</label>
+                        <input type="checkbox" id="sound-toggle" checked />
+                    </div>
+
+                    <!-- Volume Slider -->
+                    <div class="setting-row">
+                        <label for="volume-slider"
+                            >Volume: <span id="volume-val">80%</span></label
+                        >
+                        <input
+                            type="range"
+                            id="volume-slider"
+                            min="0"
+                            max="100"
+                            value="80"
+                        />
+                    </div>
+
+                    <!-- Switch Type Selector -->
+                    <div class="setting-group">
+                        <label>Tipe Switch / Efek Suara:</label>
+                        <div class="switch-grid">
+                            <button
+                                class="switch-type-btn active"
+                                data-switch="blue"
+                            >
+                                🔵 Blue Clicky
+                            </button>
+                            <button class="switch-type-btn" data-switch="thock">
+                                🟤 Thocky Cream
+                            </button>
+                            <button
+                                class="switch-type-btn"
+                                data-switch="bubble"
+                            >
+                                🫧 Bubble ASMR
+                            </button>
+                            <button class="switch-type-btn" data-switch="retro">
+                                👾 8-Bit Cyber
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="close-audio-btn" class="btn-primary">
+                    Simpan & Tutup
+                </button>
+            </div>
+        </div>
+
+        <!-- =========================================================
+       MODAL HASIL AKHIR (GAME OVER & ANALYZER)
+       ========================================================= -->
         <div class="modal-overlay" id="result-modal">
             <div class="modal-card">
                 <div class="modal-header">
@@ -115,22 +220,30 @@
                         <span class="stat-desc">CPM (Karakter/Menit)</span>
                     </div>
                     <div class="modal-stat-box">
-                        <span class="stat-num" id="modal-mistakes">0</span>
-                        <span class="stat-desc">Salah Ketik</span>
+                        <span class="stat-num" id="modal-streak">0</span>
+                        <span class="stat-desc">Max Streak 🔥</span>
                     </div>
                 </div>
 
-                <p id="modal-message" class="modal-message">
-                    Kemampuan mengetikmu sangat luar biasa!
-                </p>
+                <!-- INOVASI: WEAK KEY ANALYZER -->
+                <div class="weak-keys-box" id="weak-keys-box">
+                    <span class="weak-keys-title"
+                        >🎯 Analisis Huruf Terlemah:</span
+                    >
+                    <span class="weak-keys-list" id="weak-keys-list"
+                        >Sempurna! Tidak ada salah ketik.</span
+                    >
+                </div>
 
-                <button id="modal-restart-btn" class="btn-modal-restart">
-                    🚀 Coba Lagi Sekarang
+                <p id="modal-message" class="modal-message"></p>
+
+                <button id="modal-restart-btn" class="btn-primary">
+                    🚀 Main Lagi
                 </button>
             </div>
         </div>
 
-        <!-- File JavaScript -->
+        <!-- Script JS -->
         <script src="script.js"></script>
     </body>
 </html>
