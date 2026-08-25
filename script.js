@@ -1,16 +1,17 @@
 // ==========================================================
-// 1. KAMUS BAHASA (i18n DICTIONARY) & PARAGRAF
+// 1. KAMUS BAHASA (i18n) & PARAGRAF
 // ==========================================================
 const i18n = {
     id: {
-        brandTag: "COMBO FX",
+        brandTag: "DIMENSION FX",
         highScoreTitle: "Rekor:",
         language: "Bahasa:",
         time: "Waktu:",
         letterStreak: "Streak Huruf",
         wordStreak: "Streak Kata",
         multiplier: "MULTIPLIER",
-        overdrive: "OVERDRIVE 🔥",
+        celestial10x: "CELESTIAL GODLY 10x 🌟",
+        backrooms: "BACKROOMS HORROR",
         timeLeft: "Sisa Waktu",
         timeElapsed: "Waktu Berlalu",
         accuracy: "Akurasi",
@@ -57,21 +58,22 @@ const i18n = {
             },
         },
         banners: {
-            overdrive: "💎 OVERDRIVE!",
-            unstoppable: "🔥 UNSTOPPABLE!",
-            sickCombo: "⚡ SICK COMBO!",
+            celestial: "🌟 CELESTIAL GODLY 10X!",
+            superCombo: "🔥 SICK COMBO!",
             perfectWord: "✨ KATA SEMPURNA!",
+            horrorCurse: "💀 ENTITY ATTACK! (-1 MULTIPLIER)",
         },
     },
     en: {
-        brandTag: "COMBO FX",
+        brandTag: "DIMENSION FX",
         highScoreTitle: "Best:",
         language: "Language:",
         time: "Time:",
         letterStreak: "Letter Streak",
         wordStreak: "Word Streak",
         multiplier: "MULTIPLIER",
-        overdrive: "OVERDRIVE 🔥",
+        celestial10x: "CELESTIAL GODLY 10x 🌟",
+        backrooms: "BACKROOMS HORROR",
         timeLeft: "Time Left",
         timeElapsed: "Time Elapsed",
         accuracy: "Accuracy",
@@ -117,10 +119,10 @@ const i18n = {
             },
         },
         banners: {
-            overdrive: "💎 OVERDRIVE!",
-            unstoppable: "🔥 UNSTOPPABLE!",
-            sickCombo: "⚡ SICK COMBO!",
+            celestial: "🌟 CELESTIAL GODLY 10X!",
+            superCombo: "🔥 SICK COMBO!",
             perfectWord: "✨ PERFECT WORD!",
+            horrorCurse: "💀 ENTITY ATTACK! (-1 MULTIPLIER)",
         },
     },
 };
@@ -145,6 +147,7 @@ const paragraphs = {
 // ==========================================================
 // 2. DOM SELECTION
 // ==========================================================
+const bodyRoot = document.getElementById("body-root");
 const appContainer = document.getElementById("app-container");
 const textDisplay = document.getElementById("text-display");
 const inputField = document.getElementById("input-field");
@@ -160,7 +163,7 @@ const floatingContainer = document.getElementById(
     "floating-feedback-container",
 );
 
-// UI Translatable Tags
+// UI Translatable
 const highScoreTitleTag = document.getElementById("high-score-title");
 const lblLanguage = document.getElementById("lbl-language");
 const lblTime = document.getElementById("lbl-time");
@@ -187,6 +190,9 @@ const lblModalWordStreak = document.getElementById("lbl-modal-word-streak");
 const lblModalMistakes = document.getElementById("lbl-modal-mistakes");
 const lblWeakKeysTitle = document.getElementById("lbl-weak-keys-title");
 const lblModalRestartBtn = document.getElementById("lbl-modal-restart-btn");
+
+const letterStreakIcon = document.getElementById("letter-streak-icon");
+const wordStreakIcon = document.getElementById("word-streak-icon");
 
 // Toolbar
 const langBtns = document.querySelectorAll(".lang-btn");
@@ -222,25 +228,29 @@ const modalRestartBtn = document.getElementById("modal-restart-btn");
 const weakKeysList = document.getElementById("weak-keys-list");
 
 // ==========================================================
-// 3. STATE PERMAINAN
+// 3. STATE DUAL DIMENSION (-10 s/d +10)
 // ==========================================================
 let currentLang = "id";
-let maxTime = 60; // 15, 30, 60, atau 0 (0 = Mode Zen / Tanpa Batas Waktu)
+let maxTime = 60;
 let timeLeft = maxTime;
-let timeElapsedZen = 0; // Penghitung waktu maju untuk mode Zen
+let timeElapsedZen = 0;
 let timer = null;
 let charIndex = 0;
 let mistakes = 0;
 let isTyping = false;
 
-// Pelacak Streak & Multiplier
+// Pelacak Streak
 let letterStreak = 0;
 let maxLetterStreak = 0;
 let wordStreak = 0;
 let maxWordStreak = 0;
+
+// MULTIPLIER LEVEL: Rentang -10 s/d +10 (TIDAK ADA 0)
+// Positif: +1, +2, +3, +4, +5, +6, +7, +8, +9, +10 (Celestial)
+// Negatif: -1, -2, -3, -4, -5, -6, -7, -8, -9, -10 (Backrooms)
 let multiplierLevel = 1;
-let streakScoreInTier = 0;
-const TIER_THRESHOLD = 15;
+let streakPointsInTier = 0;
+const TIER_THRESHOLD = 10; // Butuh 10 skor untuk naik tier
 
 let currentWordHadMistake = false;
 let currentWordStartIndex = 0;
@@ -253,18 +263,16 @@ let currentSwitch = "blue";
 let audioCtx = null;
 
 // ==========================================================
-// 4. SISTEM I18N (UPDATE SELURUH BAHASA UI)
+// 4. APPLY LANGUAGE (i18n)
 // ==========================================================
 function applyLanguage(lang) {
     currentLang = lang;
     const t = i18n[lang];
 
-    // Header & High Score
     highScoreTitleTag.innerText = t.highScoreTitle;
     lblLanguage.innerText = t.language;
     lblTime.innerText = t.time;
 
-    // Streak & Stats Card
     lblLetterStreak.innerText = t.letterStreak;
     lblWordStreak.innerText = t.wordStreak;
     lblTimeStat.innerText = maxTime === 0 ? t.timeElapsed : t.timeLeft;
@@ -272,7 +280,6 @@ function applyLanguage(lang) {
     lblMistakesStat.innerText = t.mistakes;
     lblRestartBtn.innerText = t.restartBtn;
 
-    // Audio Studio Modal
     audioModalTitle.innerText = t.audioTitle;
     audioModalSubtitle.innerText = t.audioSubtitle;
     lblSoundToggle.innerText = t.soundToggle;
@@ -280,7 +287,6 @@ function applyLanguage(lang) {
     lblSwitchType.innerText = t.switchType;
     lblSaveAudioBtn.innerText = t.saveAudio;
 
-    // Result Modal
     rankBadge.innerText = t.resultBadge;
     lblModalWpm.innerText = t.modalWpmDesc;
     lblModalAccuracy.innerText = t.modalAccDesc;
@@ -292,11 +298,11 @@ function applyLanguage(lang) {
     lblModalRestartBtn.innerText = t.modalRestart;
 
     updateAudioLabel();
-    updateStreakUI();
+    updateStreakDimensionUI();
 }
 
 // ==========================================================
-// 5. WEB AUDIO SYNTHESIZER
+// 5. WEB AUDIO SYNTHESIZER (CELESTIAL & HORROR SOUNDS)
 // ==========================================================
 function initAudio() {
     if (!audioCtx) {
@@ -314,22 +320,37 @@ function playKeySound(isError = false) {
     gain.connect(audioCtx.destination);
 
     if (isError) {
+        // Suara Error Horror Thud
         const osc = audioCtx.createOscillator();
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(120, now);
-        gain.gain.setValueAtTime(audioVolume * 0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.type = multiplierLevel < 0 ? "sawtooth" : "square";
+        osc.frequency.setValueAtTime(
+            120 - Math.min(80, Math.abs(multiplierLevel) * 8),
+            now,
+        );
+        gain.gain.setValueAtTime(audioVolume * 0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
         osc.connect(gain);
         osc.start(now);
-        osc.stop(now + 0.1);
+        osc.stop(now + 0.12);
         return;
     }
+
+    // Suara Switch Normal / Celestial
+    const pitchMod =
+        multiplierLevel === 10
+            ? 200
+            : multiplierLevel > 0
+              ? multiplierLevel * 15
+              : 0;
 
     switch (currentSwitch) {
         case "thock": {
             const osc = audioCtx.createOscillator();
             osc.type = "triangle";
-            osc.frequency.setValueAtTime(220 + Math.random() * 40, now);
+            osc.frequency.setValueAtTime(
+                220 + pitchMod + Math.random() * 30,
+                now,
+            );
             gain.gain.setValueAtTime(audioVolume * 0.35, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
             osc.connect(gain);
@@ -340,7 +361,7 @@ function playKeySound(isError = false) {
         case "bubble": {
             const osc = audioCtx.createOscillator();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(750, now);
+            osc.frequency.setValueAtTime(750 + pitchMod, now);
             osc.frequency.exponentialRampToValueAtTime(200, now + 0.06);
             gain.gain.setValueAtTime(audioVolume * 0.3, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
@@ -352,7 +373,10 @@ function playKeySound(isError = false) {
         case "retro": {
             const osc = audioCtx.createOscillator();
             osc.type = "square";
-            osc.frequency.setValueAtTime(880 + (charIndex % 3) * 110, now);
+            osc.frequency.setValueAtTime(
+                880 + pitchMod + (charIndex % 4) * 90,
+                now,
+            );
             gain.gain.setValueAtTime(audioVolume * 0.15, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
             osc.connect(gain);
@@ -364,7 +388,10 @@ function playKeySound(isError = false) {
         default: {
             const osc = audioCtx.createOscillator();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(650 + Math.random() * 150, now);
+            osc.frequency.setValueAtTime(
+                650 + pitchMod + Math.random() * 120,
+                now,
+            );
             gain.gain.setValueAtTime(audioVolume * 0.2, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
             osc.connect(gain);
@@ -375,20 +402,24 @@ function playKeySound(isError = false) {
     }
 }
 
+// Chime Kata Sempurna
 function playWordChime() {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
     if (audioCtx.state === "suspended") audioCtx.resume();
 
     const now = audioCtx.currentTime;
-    const frequencies = [523.25, 659.25, 783.99, 1046.5];
+    const frequencies =
+        multiplierLevel === 10
+            ? [523.25, 659.25, 783.99, 1046.5, 1318.51] // 10x Celestial Chord (Mega Harmony)
+            : [523.25, 659.25, 783.99, 1046.5];
 
     frequencies.forEach((freq, index) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, now + index * 0.04);
-        gain.gain.setValueAtTime(audioVolume * 0.18, now + index * 0.04);
+        gain.gain.setValueAtTime(audioVolume * 0.2, now + index * 0.04);
         gain.gain.exponentialRampToValueAtTime(
             0.001,
             now + index * 0.04 + 0.25,
@@ -400,7 +431,8 @@ function playWordChime() {
     });
 }
 
-function playCrashSound(level) {
+// Horror Drone & Dissonance saat masuk Backrooms
+function playHorrorDropSound(lvl) {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
     if (audioCtx.state === "suspended") audioCtx.resume();
@@ -410,37 +442,40 @@ function playCrashSound(level) {
     const gain = audioCtx.createGain();
 
     osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(100 - level * 10, now);
-    osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+    osc.frequency.setValueAtTime(90 - lvl * 5, now);
+    osc.frequency.exponentialRampToValueAtTime(25, now + 0.45);
 
-    gain.gain.setValueAtTime(audioVolume * (0.2 + level * 0.08), now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    gain.gain.setValueAtTime(audioVolume * (0.2 + lvl * 0.05), now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
 
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start(now);
-    osc.stop(now + 0.35);
+    osc.stop(now + 0.45);
 }
 
-function triggerDynamicShake(level) {
+// ==========================================================
+// 6. GUNCANGAN LAYAR BERTINGKAT (DYNAMIC SHAKE)
+// ==========================================================
+function triggerDynamicShake(magnitude) {
     appContainer.classList.remove(
         "shake-sm",
         "shake-md",
         "shake-lg",
         "shake-extreme",
     );
-    playCrashSound(level);
+    playHorrorDropSound(Math.abs(multiplierLevel));
 
     let shakeClass = "shake-sm";
     let duration = 200;
 
-    if (level >= 5) {
+    if (magnitude >= 8) {
         shakeClass = "shake-extreme";
         duration = 500;
-    } else if (level >= 4) {
+    } else if (magnitude >= 5) {
         shakeClass = "shake-lg";
         duration = 350;
-    } else if (level >= 3) {
+    } else if (magnitude >= 3) {
         shakeClass = "shake-md";
         duration = 250;
     }
@@ -450,7 +485,7 @@ function triggerDynamicShake(level) {
 }
 
 // ==========================================================
-// 6. HIGH SCORE
+// 7. HIGH SCORE
 // ==========================================================
 function loadHighScore() {
     const modeKey = maxTime === 0 ? "zen" : maxTime;
@@ -475,7 +510,7 @@ function checkAndSaveHighScore(currentWpm) {
 }
 
 // ==========================================================
-// 7. MEMUAT PARAGRAF
+// 8. LOAD PARAGRAF
 // ==========================================================
 function loadParagraph() {
     const textList = paragraphs[currentLang];
@@ -498,11 +533,10 @@ function loadParagraph() {
 }
 
 // ==========================================================
-// 8. TIMER & METRIK (MENDUKUNG MODE COUNTDOWN & MODE ZEN)
+// 9. TIMER & METRIK
 // ==========================================================
 function initTimer() {
     if (maxTime > 0) {
-        // Mode Countdown Standar (15s, 30s, 60s)
         if (timeLeft > 0) {
             timeLeft--;
             timeLeftTag.innerText = `${timeLeft}s`;
@@ -511,7 +545,6 @@ function initTimer() {
             finishGame();
         }
     } else {
-        // Mode Zen (Tanpa Batas Waktu - Menghitung Maju)
         timeElapsedZen++;
         timeLeftTag.innerText = `${timeElapsedZen}s`;
         updateMetrics();
@@ -553,46 +586,95 @@ function removeActiveCursor() {
 }
 
 // ==========================================================
-// 9. LOGIKA TIER MULTIPLIER & STREAK UI
+// 10. ENGINE DUAL DIMENSION (+10 CELESTIAL s/d -10 BACKROOMS)
 // ==========================================================
-function addStreakPoints(points = 1) {
-    streakScoreInTier += points;
 
-    if (streakScoreInTier >= TIER_THRESHOLD) {
-        if (multiplierLevel < 5) {
+// Naikkan Poin (Saat Ketik Benar)
+function addDimensionPoints(pts = 1) {
+    streakPointsInTier += pts;
+
+    if (streakPointsInTier >= TIER_THRESHOLD) {
+        streakPointsInTier = 0;
+        if (multiplierLevel < 0) {
+            // Jika di dimensi Backrooms (-), naik mendekati dunia normal
+            multiplierLevel = multiplierLevel === -1 ? 1 : multiplierLevel + 1;
+        } else if (multiplierLevel < 10) {
+            // Jika di dimensi normal (+), naik menuju +10x
             multiplierLevel++;
-            streakScoreInTier = 0;
-        } else {
-            streakScoreInTier = TIER_THRESHOLD;
         }
     }
 
-    updateStreakUI();
+    updateStreakDimensionUI();
 }
 
-function resetMultiplier() {
-    multiplierLevel = 1;
-    streakScoreInTier = 0;
-    appContainer.classList.remove("overdrive-mode");
-    updateStreakUI();
+// Kurangi Poin (Saat Salah Ketik / Backspace)
+function deductDimensionPoints(penalty = 3) {
+    streakPointsInTier -= penalty;
+
+    if (streakPointsInTier < 0) {
+        streakPointsInTier = TIER_THRESHOLD - 2;
+        if (multiplierLevel > 1) {
+            multiplierLevel--; // Turun tier positif
+        } else if (multiplierLevel === 1) {
+            multiplierLevel = -1; // MASUK KE BACKROOMS LEVEL -1!
+        } else if (multiplierLevel > -10) {
+            multiplierLevel--; // Masuk lebih dalam ke Backrooms (-2, -3 ... -10)
+        }
+    }
+
+    updateStreakDimensionUI();
 }
 
-function updateStreakUI() {
+function updateStreakDimensionUI() {
     letterStreakVal.innerText = letterStreak;
     wordStreakVal.innerText = wordStreak;
 
     const t = i18n[currentLang];
-    comboMultiplierTag.className = `multiplier-pill tier-${multiplierLevel}`;
-    if (multiplierLevel >= 5) {
-        comboMultiplierTag.innerText = `5x ${t.overdrive}`;
-        appContainer.classList.add("overdrive-mode");
-    } else {
-        comboMultiplierTag.innerText = `${multiplierLevel}x ${t.multiplier}`;
-        appContainer.classList.remove("overdrive-mode");
-    }
 
-    const percent = Math.min(100, (streakScoreInTier / TIER_THRESHOLD) * 100);
-    comboBar.style.width = multiplierLevel >= 5 ? "100%" : `${percent}%`;
+    // 1. RESET SEMUA KELAS BACKROOMS PADA BODY
+    bodyRoot.className = "";
+    appContainer.classList.remove("celestial-10x-mode", "backrooms-corrupted");
+    comboBar.classList.remove("bar-horror");
+
+    // 2. JIKA DI SISI POSITIF (+1 s/d +10)
+    if (multiplierLevel > 0) {
+        letterStreakIcon.innerText = "🔤";
+        wordStreakIcon.innerText = "📖";
+        comboMultiplierTag.className = `multiplier-pill tier-pos-${multiplierLevel}`;
+
+        if (multiplierLevel === 10) {
+            comboMultiplierTag.innerText = t.celestial10x;
+            bodyRoot.classList.add("mode-celestial");
+            appContainer.classList.add("celestial-10x-mode");
+            comboBar.style.width = "100%";
+        } else {
+            comboMultiplierTag.innerText = `${multiplierLevel}x ${t.multiplier}`;
+            const percent = Math.min(
+                100,
+                (streakPointsInTier / TIER_THRESHOLD) * 100,
+            );
+            comboBar.style.width = `${percent}%`;
+        }
+    }
+    // 3. JIKA DI SISI NEGATIF BACKROOMS HORROR (-1 s/d -10)
+    else {
+        const horrorLvl = Math.abs(multiplierLevel);
+        letterStreakIcon.innerText = "💀";
+        wordStreakIcon.innerText = "🩸";
+        comboMultiplierTag.className = `multiplier-pill tier-neg-${horrorLvl}`;
+        comboMultiplierTag.innerText = `-${horrorLvl}x ${t.backrooms} LVL ${horrorLvl}`;
+
+        // Aktifkan Efek Visual Backrooms pada Body & Container
+        bodyRoot.classList.add(`backrooms-lvl-${horrorLvl}`);
+        appContainer.classList.add("backrooms-corrupted");
+        comboBar.classList.add("bar-horror");
+
+        const percent = Math.min(
+            100,
+            ((TIER_THRESHOLD - streakPointsInTier) / TIER_THRESHOLD) * 100,
+        );
+        comboBar.style.width = `${percent}%`;
+    }
 }
 
 function spawnCharSparkle(targetElement) {
@@ -602,7 +684,10 @@ function spawnCharSparkle(targetElement) {
 
     const sparkle = document.createElement("span");
     sparkle.className = "char-sparkle";
-    sparkle.innerText = `+${multiplierLevel}`;
+    sparkle.innerText =
+        multiplierLevel > 0 ? `+${multiplierLevel}` : `${multiplierLevel}`;
+    if (multiplierLevel < 0) sparkle.style.color = "#ef4444";
+
     sparkle.style.left = `${rect.left - boxRect.left}px`;
     sparkle.style.top = `${rect.top - boxRect.top - 14}px`;
 
@@ -610,9 +695,9 @@ function spawnCharSparkle(targetElement) {
     setTimeout(() => sparkle.remove(), 600);
 }
 
-function showWordBanner(message) {
+function showWordBanner(message, isHorror = false) {
     const banner = document.createElement("div");
-    banner.className = "floating-word-banner";
+    banner.className = `floating-word-banner ${isHorror ? "horror-banner" : ""}`;
     banner.innerText = message;
     floatingContainer.appendChild(banner);
     setTimeout(() => banner.remove(), 1100);
@@ -632,7 +717,7 @@ function highlightCompletedWord(startIndex, endIndex) {
 }
 
 // ==========================================================
-// 10. LOGIKA KETIKAN UTAMA
+// 11. LOGIKA KETIKAN UTAMA
 // ==========================================================
 function handleTyping() {
     const characters = textDisplay.querySelectorAll(".char");
@@ -644,7 +729,7 @@ function handleTyping() {
         isTyping = true;
     }
 
-    // Backspace
+    // Backspace Ditekan
     if (typedValue.length < charIndex) {
         if (charIndex > 0) {
             charIndex--;
@@ -654,12 +739,12 @@ function handleTyping() {
             characters[charIndex].classList.remove("correct", "incorrect");
             playKeySound(false);
 
-            letterStreak = 0;
+            letterStreak = Math.max(0, letterStreak - 1);
             currentWordHadMistake = true;
-            resetMultiplier();
+            deductDimensionPoints(2); // Kurangi poin streak
         }
     }
-    // Karakter Baru
+    // Karakter Baru Diketik
     else if (charIndex < characters.length) {
         const expectedChar = characters[charIndex].getAttribute("data-char");
 
@@ -672,7 +757,7 @@ function handleTyping() {
 
             letterStreak++;
             if (letterStreak > maxLetterStreak) maxLetterStreak = letterStreak;
-            addStreakPoints(1);
+            addDimensionPoints(1); // Tambah poin positif
 
             const isSpace = expectedChar === " ";
             const isLastChar = charIndex === characters.length - 1;
@@ -686,20 +771,16 @@ function handleTyping() {
 
                     playWordChime();
                     highlightCompletedWord(currentWordStartIndex, wordEndIndex);
-                    addStreakPoints(3);
+                    addDimensionPoints(4); // Bonus besar untuk kata sempurna
 
                     const banners = i18n[currentLang].banners;
-                    if (multiplierLevel >= 5)
-                        showWordBanner(`${banners.overdrive} (${wordStreak})`);
-                    else if (multiplierLevel >= 4)
-                        showWordBanner(
-                            `${banners.unstoppable} (${wordStreak})`,
-                        );
-                    else if (multiplierLevel >= 3)
-                        showWordBanner(`${banners.sickCombo} (${wordStreak})`);
+                    if (multiplierLevel === 10)
+                        showWordBanner(banners.celestial);
+                    else if (multiplierLevel >= 6)
+                        showWordBanner(`${banners.superCombo} (${wordStreak})`);
                     else showWordBanner(banners.perfectWord);
                 } else {
-                    wordStreak = 0;
+                    wordStreak = Math.max(0, wordStreak - 1);
                 }
 
                 currentWordHadMistake = false;
@@ -714,12 +795,27 @@ function handleTyping() {
             const targetChar = expectedChar.toLowerCase();
             errorKeyMap[targetChar] = (errorKeyMap[targetChar] || 0) + 1;
 
-            triggerDynamicShake(multiplierLevel);
+            // Guncangkan Layar Sesuai Tingkat Ketegangan
+            const shakeIntensity =
+                multiplierLevel < 0
+                    ? Math.abs(multiplierLevel)
+                    : multiplierLevel;
+            triggerDynamicShake(shakeIntensity);
 
             currentWordHadMistake = true;
-            letterStreak = 0;
-            wordStreak = 0;
-            resetMultiplier();
+            letterStreak = Math.max(0, letterStreak - 3);
+            wordStreak = Math.max(0, wordStreak - 1);
+
+            // KURANGI POIN DAN TURUNKAN TIER (MENUJU BACKROOMS JIKA BERLANJUT)
+            deductDimensionPoints(4);
+
+            if (multiplierLevel < 0) {
+                const banners = i18n[currentLang].banners;
+                showWordBanner(
+                    `${banners.horrorCurse} LVL ${Math.abs(multiplierLevel)}`,
+                    true,
+                );
+            }
         }
 
         charIndex++;
@@ -729,7 +825,6 @@ function handleTyping() {
     if (charIndex < characters.length) {
         characters[charIndex].classList.add("active");
     } else if (charIndex >= characters.length) {
-        // Paragraf selesai diketik -> Langsung akhiri game (termasuk pada mode Zen)
         finishGame();
     }
 
@@ -737,7 +832,7 @@ function handleTyping() {
 }
 
 // ==========================================================
-// 11. GAME OVER
+// 12. GAME OVER
 // ==========================================================
 function finishGame() {
     clearInterval(timer);
@@ -788,7 +883,7 @@ function finishGame() {
 }
 
 // ==========================================================
-// 12. RESET GAME
+// 13. RESET GAME
 // ==========================================================
 function resetGame() {
     clearInterval(timer);
@@ -805,12 +900,13 @@ function resetGame() {
     wordStreak = 0;
     maxWordStreak = 0;
     multiplierLevel = 1;
-    streakScoreInTier = 0;
+    streakPointsInTier = 0;
     currentWordHadMistake = false;
     currentWordStartIndex = 0;
     errorKeyMap = {};
 
-    appContainer.classList.remove("overdrive-mode");
+    bodyRoot.className = "";
+    appContainer.className = "container";
     inputField.disabled = false;
     inputField.value = "";
     floatingContainer.innerHTML = "";
@@ -823,13 +919,13 @@ function resetGame() {
     accuracyTag.innerText = "100%";
     mistakesTag.innerText = "0";
 
-    updateStreakUI();
+    updateStreakDimensionUI();
     loadHighScore();
     loadParagraph();
 }
 
 // ==========================================================
-// 13. EVENT LISTENERS
+// 14. EVENT LISTENERS
 // ==========================================================
 inputField.addEventListener("input", handleTyping);
 typingBox.addEventListener("click", () => inputField.focus());
@@ -837,7 +933,6 @@ typingBox.addEventListener("click", () => inputField.focus());
 restartBtn.addEventListener("click", resetGame);
 modalRestartBtn.addEventListener("click", resetGame);
 
-// Toggle Bahasa
 langBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
         langBtns.forEach((b) => b.classList.remove("active"));
@@ -848,7 +943,6 @@ langBtns.forEach((btn) => {
     });
 });
 
-// Toggle Durasi Waktu (Termasuk Mode Zen 0)
 timeBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
         timeBtns.forEach((b) => b.classList.remove("active"));
@@ -901,7 +995,7 @@ function updateAudioLabel() {
     }
 }
 
-// Inisialisasi
+// Inisialisasi Pertama Kali
 applyLanguage("id");
 loadHighScore();
 loadParagraph();

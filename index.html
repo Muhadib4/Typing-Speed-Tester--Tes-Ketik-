@@ -3,25 +3,34 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>TypeSprint Ultimate - Speed & Rhythm</title>
+        <title>
+            TypeSprint Ultimate - Dual Dimension (Celestial vs Backrooms)
+        </title>
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&family=Orbitron:wght@700;900&display=swap"
             rel="stylesheet"
         />
         <!-- Style CSS -->
         <link rel="stylesheet" href="style.css" />
     </head>
-    <body>
+    <body id="body-root">
+        <!-- OVERLAY LATAR BELAKANG KHUSUS (CELESTIAL NEBULA & BACKROOMS HORROR) -->
+        <div class="celestial-bg" id="celestial-bg"></div>
+        <div class="backrooms-overlay" id="backrooms-overlay"></div>
+        <div class="vhs-scanlines" id="vhs-scanlines"></div>
+        <div class="horror-vignette" id="horror-vignette"></div>
+
         <div class="container" id="app-container">
             <!-- TOP NAVIGATION & CONTROLS -->
             <header class="header">
                 <div class="header-top">
                     <div class="brand">
                         <h1>
-                            ⚡ TypeSprint <span id="brand-tag">COMBO FX</span>
+                            ⚡ TypeSprint
+                            <span id="brand-tag">DIMENSION FX</span>
                         </h1>
                     </div>
 
@@ -48,7 +57,6 @@
 
                 <!-- TOOLBAR: PILIH BAHASA & DURASI WAKTU -->
                 <div class="toolbar">
-                    <!-- Pilihan Bahasa -->
                     <div class="segmented-control">
                         <span class="toolbar-label" id="lbl-language"
                             >Bahasa:</span
@@ -61,7 +69,6 @@
                         </button>
                     </div>
 
-                    <!-- Pilihan Durasi (Termasuk Mode Zen Tanpa Waktu: 0 / ∞) -->
                     <div class="segmented-control">
                         <span class="toolbar-label" id="lbl-time">Waktu:</span>
                         <button class="time-btn" data-time="15">15s</button>
@@ -84,7 +91,7 @@
             <div class="combo-panel">
                 <!-- Letter Streak -->
                 <div class="streak-badge letter-streak">
-                    <span class="streak-icon">🔤</span>
+                    <span class="streak-icon" id="letter-streak-icon">🔤</span>
                     <div class="streak-text-group">
                         <span class="streak-title" id="lbl-letter-streak"
                             >Streak Huruf</span
@@ -95,7 +102,7 @@
 
                 <!-- Word Streak -->
                 <div class="streak-badge word-streak">
-                    <span class="streak-icon">📖</span>
+                    <span class="streak-icon" id="word-streak-icon">📖</span>
                     <div class="streak-text-group">
                         <span class="streak-title" id="lbl-word-streak"
                             >Streak Kata</span
@@ -104,7 +111,7 @@
                     </div>
                 </div>
 
-                <!-- Multiplier Pill -->
+                <!-- Multiplier Pill (Bisa Positif 1x s/d 10x ATAU Minus -1x s/d -10x Backrooms) -->
                 <div class="multiplier-pill" id="combo-multiplier">
                     1x MULTIPLIER
                 </div>
