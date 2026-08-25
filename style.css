@@ -2,18 +2,20 @@
 1. RESET CSS & VARIABEL WARNA
 ========================================================== */
 :root {
-    --bg-color: #0f172a; /* Dark Slate */
-    --card-bg: #1e293b; /* Slate 800 */
-    --card-border: #334155; /* Slate 700 */
-    --text-main: #f8fafc; /* Putih Bersih */
-    --text-muted: #94a3b8; /* Abu-abu terang */
+    --bg-color: #0b0f19; /* Ultra Dark Blue/Black */
+    --card-bg: #151d30; /* Slate/Navy */
+    --card-border: #263352; /* Border halus */
+    --text-main: #f8fafc;
+    --text-muted: #8493b0;
     --accent: #38bdf8; /* Sky Blue */
-    --accent-hover: #0284c7;
-    --gold: #fbbf24; /* Warna Emas untuk High Score */
-    --char-default: #64748b; /* Huruf belum diketik */
-    --char-correct: #4ade80; /* Hijau */
-    --char-incorrect: #f87171; /* Merah */
-    --char-error-bg: rgba(248, 113, 113, 0.2);
+    --accent-glow: rgba(56, 189, 248, 0.4);
+    --gold: #fbbf24; /* Gold */
+    --fire-orange: #f97316; /* Warna Streak Api */
+    --fire-red: #ef4444; /* Warna Error */
+    --char-default: #5a6b8c;
+    --char-correct: #4ade80;
+    --char-incorrect: #f87171;
+    --char-error-bg: rgba(248, 113, 113, 0.25);
     --cursor-color: #38bdf8;
 }
 
@@ -32,143 +34,236 @@ body {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    overflow-x: hidden;
 }
 
 /* ==========================================================
-2. CONTAINER UTAMA
+2. CONTAINER UTAMA & SCREEN SHAKE FX
 ========================================================== */
 .container {
     width: 100%;
-    max-width: 850px;
+    max-width: 880px;
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 35px 30px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border-radius: 24px;
+    padding: 35px 32px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 20px;
+    transition: transform 0.1s ease;
+}
+
+/* Efek Getar Layar saat salah ketik (Screen Shake) */
+.shake-screen {
+    animation: shake 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+    10%,
+    90% {
+        transform: translate3d(-2px, 0, 0);
+    }
+    20%,
+    80% {
+        transform: translate3d(3px, 0, 0);
+    }
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-3px, 0, 0);
+    }
+    40%,
+    60% {
+        transform: translate3d(3px, 0, 0);
+    }
 }
 
 /* ==========================================================
-3. HEADER, HIGH SCORE, & SOUND TOGGLE
+3. HEADER, BRANDING, & TOOLBAR
 ========================================================== */
 .header {
-    text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    gap: 16px;
 }
 
 .header-top {
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-.header-top h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
+.brand h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
     letter-spacing: -0.5px;
 }
 
-/* Tombol Suara */
-.icon-btn {
-    background-color: rgba(15, 23, 42, 0.6);
+.brand h1 span {
+    font-size: 0.75rem;
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding: 2px 6px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pill-btn {
+    background-color: rgba(11, 15, 25, 0.6);
     border: 1px solid var(--card-border);
     color: var(--text-main);
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 7px 14px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-family: "JetBrains Mono", monospace;
-    transition: all 0.2s ease;
-}
-
-.icon-btn:hover {
-    border-color: var(--accent);
-    background-color: rgba(56, 189, 248, 0.1);
-}
-
-.header p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-/* Badge Rekor Tertinggi */
-.high-score-badge {
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.pill-btn:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.high-score-badge {
     background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    border: 1px solid rgba(251, 191, 36, 0.35);
     color: var(--gold);
     padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.high-score-badge span {
+    font-size: 0.82rem;
     font-family: "JetBrains Mono", monospace;
     font-weight: 700;
 }
 
-/* ==========================================================
-4. TIME SELECTOR (PILIHAN WAKTU)
-========================================================== */
-.time-selector {
+/* Toolbar Bahasa & Waktu */
+.toolbar {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    background-color: rgba(15, 23, 42, 0.4);
-    padding: 8px 16px;
-    border-radius: 12px;
-    align-self: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    background-color: rgba(11, 15, 25, 0.5);
+    padding: 10px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.selector-label {
-    font-size: 0.8rem;
+.segmented-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.toolbar-label {
+    font-size: 0.75rem;
     color: var(--text-muted);
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
+    margin-right: 4px;
 }
 
+.lang-btn,
 .time-btn {
     background: transparent;
     border: 1px solid transparent;
     color: var(--text-muted);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    padding: 4px 12px;
-    border-radius: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
+.lang-btn:hover,
 .time-btn:hover {
     color: var(--text-main);
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
+.lang-btn.active,
 .time-btn.active {
     background-color: var(--accent);
-    color: #0f172a;
+    color: #0b0f19;
     font-weight: 700;
+    box-shadow: 0 0 12px var(--accent-glow);
 }
 
 /* ==========================================================
-5. SCOREBOARD / KARTU STATISTIK
+4. INOVASI: COMBO STREAK BAR (ARCADE GLOW)
+========================================================== */
+.combo-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.combo-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
+}
+
+.combo-text {
+    color: var(--fire-orange);
+}
+
+.combo-multiplier {
+    background: linear-gradient(135deg, var(--fire-orange), #fbbf24);
+    color: #0b0f19;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+.combo-progress-bg {
+    width: 100%;
+    height: 6px;
+    background-color: rgba(11, 15, 25, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.combo-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--fire-orange));
+    border-radius: 10px;
+    transition:
+        width 0.15s ease,
+        background 0.3s ease;
+}
+
+/* ==========================================================
+5. SCOREBOARD STATS
 ========================================================== */
 .stats-card {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 12px;
-    background-color: rgba(15, 23, 42, 0.6);
+    background-color: rgba(11, 15, 25, 0.6);
     border: 1px solid var(--card-border);
     border-radius: 14px;
     padding: 14px;
@@ -180,39 +275,40 @@ body {
     align-items: center;
     padding: 8px;
     border-radius: 8px;
-    background-color: rgba(30, 41, 59, 0.5);
+    background-color: rgba(21, 29, 48, 0.6);
 }
 
 .stat-label {
     font-size: 0.72rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     color: var(--text-muted);
     margin-bottom: 4px;
 }
 
 .stat-value {
     font-size: 1.35rem;
-    font-weight: 700;
+    font-weight: 800;
     font-family: "JetBrains Mono", monospace;
     color: var(--accent);
 }
 
 /* ==========================================================
-6. AREA KETIK (TYPING BOX)
+6. TYPING BOX & TEXT HIGHLIGHT
 ========================================================== */
 .typing-box {
     position: relative;
-    background-color: rgba(15, 23, 42, 0.85);
+    background-color: rgba(11, 15, 25, 0.9);
     border: 2px solid var(--card-border);
-    border-radius: 14px;
-    padding: 26px;
+    border-radius: 16px;
+    padding: 28px 24px;
     cursor: text;
     min-height: 160px;
     display: flex;
     align-items: center;
-    transition: all 0.2s ease;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .typing-box:focus-within {
@@ -275,37 +371,40 @@ body {
 }
 
 /* ==========================================================
-7. TOMBOL RESTART
+7. BUTTONS
 ========================================================== */
 .controls {
     display: flex;
     justify-content: center;
 }
 
-.btn-restart {
+.btn-restart,
+.btn-primary {
     background-color: var(--accent);
-    color: #0f172a;
+    color: #0b0f19;
     border: none;
     font-family: "Inter", sans-serif;
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
     padding: 12px 26px;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     transition: all 0.2s ease;
 }
 
-.btn-restart:hover {
+.btn-restart:hover,
+.btn-primary:hover {
     background-color: #7dd3fc;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
 }
 
 /* ==========================================================
-8. MODAL POPUP HASIL AKHIR (GAME OVER)
+8. MODAL AUDIO STUDIO & GAME OVER
 ========================================================== */
 .modal-overlay {
     position: fixed;
@@ -313,8 +412,8 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px); /* Efek blur latar belakang */
+    background: rgba(11, 15, 25, 0.85);
+    backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -322,10 +421,9 @@ body {
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
-/* Saat modal ditampilkan oleh JavaScript */
 .modal-overlay.show {
     opacity: 1;
     visibility: visible;
@@ -336,12 +434,12 @@ body {
     border: 1px solid var(--card-border);
     border-radius: 20px;
     width: 100%;
-    max-width: 480px;
-    padding: 35px 30px;
+    max-width: 500px;
+    padding: 32px 28px;
     text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
     transform: scale(0.9);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -357,31 +455,131 @@ body {
     color: var(--accent);
     border-radius: 20px;
     padding: 4px 14px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .modal-header h2 {
     font-size: 1.8rem;
-    color: var(--text-main);
 }
 
-.modal-stats {
+.modal-header h3 {
+    font-size: 1.35rem;
+}
+
+.modal-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Audio Studio Settings */
+.audio-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.setting-row input[type="range"] {
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.switch-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 8px;
 }
 
-.modal-stat-box {
-    background: rgba(15, 23, 42, 0.6);
+.switch-type-btn {
+    background: rgba(11, 15, 25, 0.6);
     border: 1px solid var(--card-border);
-    padding: 15px;
+    color: var(--text-main);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.switch-type-btn:hover {
+    border-color: var(--accent);
+}
+
+.switch-type-btn.active {
+    border-color: var(--accent);
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Weak Keys Analyzer Box */
+.weak-keys-box {
+    background: rgba(11, 15, 25, 0.7);
+    border: 1px solid var(--card-border);
+    padding: 12px;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.weak-keys-title {
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.weak-key-tag {
+    display: inline-block;
+    background: rgba(248, 113, 113, 0.2);
+    color: var(--char-incorrect);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin: 0 4px;
+}
+
+/* Stats in Result Modal */
+.modal-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.modal-stat-box {
+    background: rgba(11, 15, 25, 0.6);
+    border: 1px solid var(--card-border);
+    padding: 14px;
+    border-radius: 12px;
 }
 
 .modal-stat-box.highlight {
@@ -389,52 +587,33 @@ body {
     background: linear-gradient(
         135deg,
         rgba(56, 189, 248, 0.15),
-        rgba(15, 23, 42, 0.8)
+        rgba(11, 15, 25, 0.8)
     );
     border-color: var(--accent);
 }
 
 .modal-stat-box .stat-num {
     font-family: "JetBrains Mono", monospace;
-    font-size: 1.6rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: var(--accent);
 }
 
 .modal-stat-box.highlight .stat-num {
-    font-size: 2.2rem;
+    font-size: 2.1rem;
 }
 
 .modal-stat-box .stat-desc {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--text-muted);
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .modal-message {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     color: #cbd5e1;
     line-height: 1.5;
-}
-
-.btn-modal-restart {
-    background-color: var(--accent);
-    color: #0f172a;
-    border: none;
-    font-family: "Inter", sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 14px 20px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-modal-restart:hover {
-    background-color: #7dd3fc;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
 }
 
 /* ==========================================================
@@ -444,16 +623,10 @@ body {
     .container {
         padding: 20px 16px;
     }
-
-    .header-top h1 {
-        font-size: 1.4rem;
+    .toolbar {
+        flex-direction: column;
     }
-
-    .stats-card {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .text-display {
-        font-size: 1.05rem;
+    .switch-grid {
+        grid-template-columns: 1fr;
     }
 }
