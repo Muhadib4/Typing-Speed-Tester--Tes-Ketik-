@@ -1,5 +1,5 @@
 // ==========================================================
-// 1. DATASET PARAGRAF (BAHASA INDONESIA & ENGLISH)
+// 1. DATASET PARAGRAF (INDONESIA & ENGLISH)
 // ==========================================================
 const paragraphs = {
     id: [
@@ -19,7 +19,7 @@ const paragraphs = {
 };
 
 // ==========================================================
-// 2. DOM SELECTION (ELEMEN HTML)
+// 2. DOM SELECTION
 // ==========================================================
 const appContainer = document.getElementById("app-container");
 const textDisplay = document.getElementById("text-display");
@@ -32,13 +32,17 @@ const accuracyTag = document.getElementById("accuracy-value");
 const mistakesTag = document.getElementById("mistakes-value");
 const restartBtn = document.getElementById("restart-btn");
 const highScoreValueTag = document.getElementById("high-score-value");
+const floatingContainer = document.getElementById(
+    "floating-feedback-container",
+);
 
 // Toolbar Elemen
 const langBtns = document.querySelectorAll(".lang-btn");
 const timeBtns = document.querySelectorAll(".time-btn");
 
-// Combo Streak Elemen
-const comboCountTag = document.getElementById("combo-count");
+// Dual Streak Elemen
+const letterStreakVal = document.getElementById("letter-streak-val");
+const wordStreakVal = document.getElementById("word-streak-val");
 const comboMultiplierTag = document.getElementById("combo-multiplier");
 const comboBar = document.getElementById("combo-bar");
 
@@ -57,38 +61,44 @@ const resultModal = document.getElementById("result-modal");
 const modalWpm = document.getElementById("modal-wpm");
 const modalAccuracy = document.getElementById("modal-accuracy");
 const modalCpm = document.getElementById("modal-cpm");
-const modalStreak = document.getElementById("modal-streak");
+const modalLetterStreak = document.getElementById("modal-letter-streak");
+const modalWordStreak = document.getElementById("modal-word-streak");
+const modalMistakes = document.getElementById("modal-mistakes");
 const modalRankTitle = document.getElementById("modal-rank-title");
 const modalMessage = document.getElementById("modal-message");
 const modalRestartBtn = document.getElementById("modal-restart-btn");
 const weakKeysList = document.getElementById("weak-keys-list");
 
 // ==========================================================
-// 3. STATE APLIKASI
+// 3. STATE PERMAINAN
 // ==========================================================
-let currentLang = "id"; // 'id' atau 'en'
-let maxTime = 60; // 15, 30, atau 60 detik
+let currentLang = "id";
+let maxTime = 60;
 let timeLeft = maxTime;
 let timer = null;
 let charIndex = 0;
 let mistakes = 0;
 let isTyping = false;
 
-// State Combo Streak
-let currentStreak = 0;
-let maxStreak = 0;
+// Pelacak Streak Huruf & Kata
+let letterStreak = 0;
+let maxLetterStreak = 0;
+let wordStreak = 0;
+let maxWordStreak = 0;
+let currentWordHadMistake = false; // Penanda apakah kata yang sedang diketik ada salah
+let currentWordStartIndex = 0; // Indeks awal kata saat ini
 
-// State Analyzer Huruf Salah (Weak Key Map)
+// Analyzer Huruf Salah
 let errorKeyMap = {};
 
-// State Audio Studio
+// Audio Studio State
 let isSoundEnabled = true;
-let audioVolume = 0.8; // Rentang 0.0 - 1.0
-let currentSwitch = "blue"; // 'blue', 'thock', 'bubble', 'retro'
+let audioVolume = 0.8;
+let currentSwitch = "blue";
 let audioCtx = null;
 
 // ==========================================================
-// 4. WEB AUDIO API SYNTHESIZER (4 PROFIL SWITCH)
+// 4. WEB AUDIO SYNTHESIZER (KEY CLICK & WORD CHIME)
 // ==========================================================
 function initAudio() {
     if (!audioCtx) {
@@ -96,6 +106,7 @@ function initAudio() {
     }
 }
 
+// 1. Suara Ketikan Per Huruf
 function playKeySound(isError = false) {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
@@ -105,7 +116,6 @@ function playKeySound(isError = false) {
     const gain = audioCtx.createGain();
     gain.connect(audioCtx.destination);
 
-    // 1. SUARA JIKA SALAH KETIK (THUD / ERROR BUZZ)
     if (isError) {
         const osc = audioCtx.createOscillator();
         osc.type = "sawtooth";
@@ -118,10 +128,8 @@ function playKeySound(isError = false) {
         return;
     }
 
-    // 2. SUARA SESUAI PROFIL SWITCH YANG DIPILIH
     switch (currentSwitch) {
         case "thock": {
-            // Profil Thocky Cream Switch (Nada rendah, empuk & hangat)
             const osc = audioCtx.createOscillator();
             osc.type = "triangle";
             osc.frequency.setValueAtTime(220 + Math.random() * 40, now);
@@ -132,9 +140,7 @@ function playKeySound(isError = false) {
             osc.stop(now + 0.05);
             break;
         }
-
         case "bubble": {
-            // Profil Bubble Pop ASMR (Pitch drop dari tinggi ke rendah)
             const osc = audioCtx.createOscillator();
             osc.type = "sine";
             osc.frequency.setValueAtTime(750, now);
@@ -146,9 +152,7 @@ function playKeySound(isError = false) {
             osc.stop(now + 0.06);
             break;
         }
-
         case "retro": {
-            // Profil 8-Bit Cyberpunk (Retro arcade beep)
             const osc = audioCtx.createOscillator();
             osc.type = "square";
             osc.frequency.setValueAtTime(880 + (charIndex % 3) * 110, now);
@@ -159,10 +163,8 @@ function playKeySound(isError = false) {
             osc.stop(now + 0.04);
             break;
         }
-
         case "blue":
         default: {
-            // Profil Blue Switch (Clicky, garing, bernada tinggi)
             const osc = audioCtx.createOscillator();
             osc.type = "sine";
             osc.frequency.setValueAtTime(650 + Math.random() * 150, now);
@@ -176,7 +178,34 @@ function playKeySound(isError = false) {
     }
 }
 
-// Efek Screen Shake saat combo pecah
+// 2. Harmoni Chime Saat 1 Kata Selesai Sempurna
+function playWordChime() {
+    if (!isSoundEnabled || audioVolume <= 0) return;
+    initAudio();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+
+    const now = audioCtx.currentTime;
+    const frequencies = [523.25, 659.25, 783.99]; // Nada C5 - E5 - G5 (Major Crystal Chord)
+
+    frequencies.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + index * 0.04);
+
+        gain.gain.setValueAtTime(audioVolume * 0.18, now + index * 0.04);
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            now + index * 0.04 + 0.25,
+        );
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + index * 0.04);
+        osc.stop(now + index * 0.04 + 0.25);
+    });
+}
+
 function triggerScreenShake() {
     appContainer.classList.add("shake-screen");
     setTimeout(() => appContainer.classList.remove("shake-screen"), 250);
@@ -206,7 +235,7 @@ function checkAndSaveHighScore(currentWpm) {
 }
 
 // ==========================================================
-// 6. LOAD PARAGRAF
+// 6. MEMUAT PARAGRAF
 // ==========================================================
 function loadParagraph() {
     const textList = paragraphs[currentLang];
@@ -228,7 +257,7 @@ function loadParagraph() {
 }
 
 // ==========================================================
-// 7. TIMER & METRIK REAL-TIME
+// 7. TIMER & UPDATE METRIK
 // ==========================================================
 function initTimer() {
     if (timeLeft > 0) {
@@ -275,25 +304,53 @@ function removeActiveCursor() {
 }
 
 // ==========================================================
-// 8. LOGIKA COMBO STREAK BAR
+// 8. LOGIKA DUAL STREAK & FLOATING FEEDBACK
 // ==========================================================
-function updateComboUI() {
-    comboCountTag.innerText = currentStreak;
+function updateStreakUI() {
+    letterStreakVal.innerText = letterStreak;
+    wordStreakVal.innerText = wordStreak;
 
-    // Tentukan Multiplier
-    let multiplier = "1x";
-    if (currentStreak >= 50) multiplier = "5x 🔥";
-    else if (currentStreak >= 25) multiplier = "3x ⚡";
-    else if (currentStreak >= 10) multiplier = "2x ✨";
+    // Hitung Multiplier
+    let multiplier = "1x MULTIPLIER";
+    if (wordStreak >= 10 || letterStreak >= 60) multiplier = "5x ULTRA 🔥";
+    else if (wordStreak >= 5 || letterStreak >= 30) multiplier = "3x MEGA ⚡";
+    else if (wordStreak >= 2 || letterStreak >= 15) multiplier = "2x COMBO ✨";
     comboMultiplierTag.innerText = multiplier;
 
-    // Lebar progress bar (maksimal 100% pada 50 streak)
-    const progressPercent = Math.min(100, (currentStreak / 50) * 100);
+    // Progress bar berdasarkan letter streak
+    const progressPercent = Math.min(100, (letterStreak / 60) * 100);
     comboBar.style.width = `${progressPercent}%`;
 }
 
+// Menampilkan Animasi Pop-up Melayang saat Kata Sempurna
+function showFloatingFeedback(message) {
+    const badge = document.createElement("div");
+    badge.className = "floating-badge";
+    badge.innerText = message;
+    floatingContainer.appendChild(badge);
+
+    // Hapus elemen setelah animasi selesai (1.2 detik)
+    setTimeout(() => {
+        badge.remove();
+    }, 1200);
+}
+
+// Efek Kilau Emas pada Kata yang Selesai
+function highlightCompletedWord(startIndex, endIndex) {
+    const characters = textDisplay.querySelectorAll(".char");
+    for (let i = startIndex; i <= endIndex; i++) {
+        if (characters[i]) {
+            characters[i].classList.add("word-perfect");
+            setTimeout(
+                () => characters[i]?.classList.remove("word-perfect"),
+                600,
+            );
+        }
+    }
+}
+
 // ==========================================================
-// 9. LOGIKA KETIKAN UTAMA
+// 9. LOGIKA UTAMA MENGETIK
 // ==========================================================
 function handleTyping() {
     const characters = textDisplay.querySelectorAll(".char");
@@ -305,7 +362,7 @@ function handleTyping() {
         isTyping = true;
     }
 
-    // Tombol Backspace ditekan
+    // Tombol Backspace Ditekan
     if (typedValue.length < charIndex) {
         if (charIndex > 0) {
             charIndex--;
@@ -314,11 +371,14 @@ function handleTyping() {
             }
             characters[charIndex].classList.remove("correct", "incorrect");
             playKeySound(false);
-            currentStreak = 0; // Reset streak saat backspace
-            updateComboUI();
+
+            // Backspace mereset streak huruf & menandai kata saat ini ada salah
+            letterStreak = 0;
+            currentWordHadMistake = true;
+            updateStreakUI();
         }
     }
-    // Karakter baru diketik
+    // Karakter Baru Diketik
     else if (charIndex < characters.length && timeLeft > 0) {
         const expectedChar = characters[charIndex].innerText;
 
@@ -327,26 +387,64 @@ function handleTyping() {
             characters[charIndex].classList.remove("incorrect");
             playKeySound(false);
 
-            // Tambah Combo Streak
-            currentStreak++;
-            if (currentStreak > maxStreak) maxStreak = currentStreak;
-            updateComboUI();
+            // 1. TAMBAH STREAK HURUF
+            letterStreak++;
+            if (letterStreak > maxLetterStreak) maxLetterStreak = letterStreak;
+
+            // 2. CEK APAKAH INI AKHIR DARI SUATU KATA (Spasi atau Huruf Terakhir Paragraf)
+            const isSpace = expectedChar === " ";
+            const isLastChar = charIndex === characters.length - 1;
+
+            if (isSpace || isLastChar) {
+                const wordEndIndex = isLastChar ? charIndex : charIndex - 1;
+
+                if (!currentWordHadMistake) {
+                    // Kata selesai 100% sempurna!
+                    wordStreak++;
+                    if (wordStreak > maxWordStreak) maxWordStreak = wordStreak;
+
+                    playWordChime();
+                    highlightCompletedWord(currentWordStartIndex, wordEndIndex);
+
+                    // Tentukan Pesan Pop-up
+                    if (wordStreak >= 10)
+                        showFloatingFeedback(`💎 GODLIKE! ${wordStreak} WORDS`);
+                    else if (wordStreak >= 5)
+                        showFloatingFeedback(
+                            `🔥 UNSTOPPABLE! ${wordStreak} WORDS`,
+                        );
+                    else if (wordStreak >= 3)
+                        showFloatingFeedback(`⚡ GREAT! +1 WORD`);
+                    else showFloatingFeedback(`✨ PERFECT! +1 WORD`);
+                } else {
+                    // Kata ini pernah ada salah ketik
+                    wordStreak = 0;
+                }
+
+                // Reset untuk kata berikutnya
+                currentWordHadMistake = false;
+                currentWordStartIndex = charIndex + 1;
+            }
+
+            updateStreakUI();
         } else {
             mistakes++;
             characters[charIndex].classList.add("incorrect");
             characters[charIndex].classList.remove("correct");
             playKeySound(true);
 
-            // Rekam huruf yang gagal diketik untuk Weak Key Analyzer
+            // Catat huruf salah
             const targetChar = expectedChar.toLowerCase();
             errorKeyMap[targetChar] = (errorKeyMap[targetChar] || 0) + 1;
 
-            // Reset Streak & Beri Screen Shake jika streak tinggi pecah
-            if (currentStreak >= 10) {
+            // Tandai kata saat ini salah & reset streak
+            currentWordHadMistake = true;
+            if (letterStreak >= 15 || wordStreak >= 3) {
                 triggerScreenShake();
             }
-            currentStreak = 0;
-            updateComboUI();
+            letterStreak = 0;
+            wordStreak = 0;
+            updateStreakUI();
         }
 
         charIndex++;
@@ -374,7 +472,6 @@ function finishGame() {
     const finalStats = updateMetrics();
     const isNewRecord = checkAndSaveHighScore(finalStats.wpm);
 
-    // Penentuan Peringkat Berdasarkan WPM
     let rankTitle = "";
     let rankMessage = "";
 
@@ -408,11 +505,13 @@ function finishGame() {
     modalWpm.innerText = finalStats.wpm;
     modalAccuracy.innerText = `${finalStats.accuracy}%`;
     modalCpm.innerText = finalStats.cpm;
-    modalStreak.innerText = maxStreak;
+    modalLetterStreak.innerText = maxLetterStreak;
+    modalWordStreak.innerText = maxWordStreak;
+    modalMistakes.innerText = mistakes;
     modalRankTitle.innerText = rankTitle;
     modalMessage.innerText = rankMessage;
 
-    // Analisis Huruf Terlemah (Weak Key Analyzer)
+    // Weak Key List
     const sortedErrors = Object.entries(errorKeyMap).sort(
         (a, b) => b[1] - a[1],
     );
@@ -430,7 +529,6 @@ function finishGame() {
             "✨ <b>Sempurna!</b> Kamu tidak melakukan salah ketik sama sekali.";
     }
 
-    // Buka modal hasil
     resultModal.classList.add("show");
 }
 
@@ -446,12 +544,17 @@ function resetGame() {
     mistakes = 0;
     isTyping = false;
     timer = null;
-    currentStreak = 0;
-    maxStreak = 0;
+    letterStreak = 0;
+    maxLetterStreak = 0;
+    wordStreak = 0;
+    maxWordStreak = 0;
+    currentWordHadMistake = false;
+    currentWordStartIndex = 0;
     errorKeyMap = {};
 
     inputField.disabled = false;
     inputField.value = "";
+    floatingContainer.innerHTML = "";
 
     timeLeftTag.innerText = `${maxTime}s`;
     wpmTag.innerText = "0";
@@ -459,7 +562,7 @@ function resetGame() {
     accuracyTag.innerText = "100%";
     mistakesTag.innerText = "0";
 
-    updateComboUI();
+    updateStreakUI();
     loadHighScore();
     loadParagraph();
 }
@@ -473,7 +576,6 @@ typingBox.addEventListener("click", () => inputField.focus());
 restartBtn.addEventListener("click", resetGame);
 modalRestartBtn.addEventListener("click", resetGame);
 
-// Toggle Pilihan Bahasa (ID / EN)
 langBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
         langBtns.forEach((b) => b.classList.remove("active"));
@@ -483,7 +585,6 @@ langBtns.forEach((btn) => {
     });
 });
 
-// Toggle Pilihan Waktu (15s, 30s, 60s)
 timeBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
         timeBtns.forEach((b) => b.classList.remove("active"));
@@ -493,7 +594,6 @@ timeBtns.forEach((btn) => {
     });
 });
 
-// Audio Settings Modal Open & Close
 audioSettingsBtn.addEventListener("click", () =>
     audioModal.classList.add("show"),
 );
@@ -501,28 +601,25 @@ closeAudioBtn.addEventListener("click", () =>
     audioModal.classList.remove("show"),
 );
 
-// Master Toggle Suara
 soundToggle.addEventListener("change", (e) => {
     isSoundEnabled = e.target.checked;
     updateAudioLabel();
 });
 
-// Slider Volume
 volumeSlider.addEventListener("input", (e) => {
     audioVolume = parseInt(e.target.value, 10) / 100;
     volumeValTag.innerText = `${e.target.value}%`;
     updateAudioLabel();
-    playKeySound(false); // Play sample sound
+    playKeySound(false);
 });
 
-// Switch Type Selector
 switchTypeBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
         switchTypeBtns.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         currentSwitch = btn.getAttribute("data-switch");
         updateAudioLabel();
-        playKeySound(false); // Play sample sound
+        playKeySound(false);
     });
 });
 
@@ -541,7 +638,7 @@ function updateAudioLabel() {
 }
 
 // ==========================================================
-// 13. INISIALISASI PERTAMA KALI
+// 13. INIT
 // ==========================================================
 loadHighScore();
 loadParagraph();
