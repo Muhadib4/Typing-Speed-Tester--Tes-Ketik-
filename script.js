@@ -1,6 +1,130 @@
 // ==========================================================
-// 1. DATASET PARAGRAF (INDONESIA & ENGLISH)
+// 1. KAMUS BAHASA (i18n DICTIONARY) & PARAGRAF
 // ==========================================================
+const i18n = {
+    id: {
+        brandTag: "COMBO FX",
+        highScoreTitle: "Rekor:",
+        language: "Bahasa:",
+        time: "Waktu:",
+        letterStreak: "Streak Huruf",
+        wordStreak: "Streak Kata",
+        multiplier: "MULTIPLIER",
+        overdrive: "OVERDRIVE 🔥",
+        timeLeft: "Sisa Waktu",
+        timeElapsed: "Waktu Berlalu",
+        accuracy: "Akurasi",
+        mistakes: "Salah Ketik",
+        restartBtn: "Reset / Ganti Teks",
+        audioTitle: "🎛️ Audio & Switch Studio",
+        audioSubtitle: "Atur profil suara ketikan dan volume",
+        soundToggle: "Suara Keyboard & Chime:",
+        volume: "Volume:",
+        switchType: "Tipe Switch / Efek Suara:",
+        saveAudio: "Simpan & Tutup",
+        resultBadge: "🏆 Hasil Tes",
+        modalWpmDesc: "WPM (Kata/Menit)",
+        modalAccDesc: "Akurasi",
+        modalCpmDesc: "CPM (Karakter/Menit)",
+        modalLetterStreakDesc: "Max Letter Streak 🔤",
+        modalWordStreakDesc: "Max Word Streak 📖",
+        modalMistakesDesc: "Salah Ketik",
+        weakKeysTitle: "🎯 Analisis Huruf Terlemah:",
+        weakKeysClean:
+            "✨ <b>Sempurna!</b> Kamu tidak melakukan salah ketik sama sekali.",
+        modalRestart: "🚀 Main Lagi",
+        newRecord: "🎉 REKOR TERBARU BERHASIL DIPECAHKAN!",
+        ranks: {
+            godlike: {
+                title: "⚡ Dewa Ketik!",
+                msg: "Kecepatan jarimu luar biasa spektakuler setara profesional esports!",
+            },
+            master: {
+                title: "🚀 Master Ketik",
+                msg: "Kecepatanmu sangat mengesankan di atas rata-rata pengguna umum!",
+            },
+            pro: {
+                title: "🚗 Pengetik Mahir",
+                msg: "Kerja bagus! Kecepatan mengetikmu sudah sangat lancar dan produktif.",
+            },
+            intermediate: {
+                title: "🚲 Tingkat Menengah",
+                msg: "Kemampuan yang solid! Terus berlatih untuk meningkatkan ritme.",
+            },
+            beginner: {
+                title: "🐢 Pengetik Pemula",
+                msg: "Awal yang baik! Luangkan waktu latihan 5 menit setiap hari.",
+            },
+        },
+        banners: {
+            overdrive: "💎 OVERDRIVE!",
+            unstoppable: "🔥 UNSTOPPABLE!",
+            sickCombo: "⚡ SICK COMBO!",
+            perfectWord: "✨ KATA SEMPURNA!",
+        },
+    },
+    en: {
+        brandTag: "COMBO FX",
+        highScoreTitle: "Best:",
+        language: "Language:",
+        time: "Time:",
+        letterStreak: "Letter Streak",
+        wordStreak: "Word Streak",
+        multiplier: "MULTIPLIER",
+        overdrive: "OVERDRIVE 🔥",
+        timeLeft: "Time Left",
+        timeElapsed: "Time Elapsed",
+        accuracy: "Accuracy",
+        mistakes: "Mistakes",
+        restartBtn: "Reset / New Text",
+        audioTitle: "🎛️ Audio & Switch Studio",
+        audioSubtitle: "Customize typing sound profile & volume",
+        soundToggle: "Keyboard & Chime Sound:",
+        volume: "Volume:",
+        switchType: "Switch Profile / Sound FX:",
+        saveAudio: "Save & Close",
+        resultBadge: "🏆 Test Results",
+        modalWpmDesc: "WPM (Words/Min)",
+        modalAccDesc: "Accuracy",
+        modalCpmDesc: "CPM (Chars/Min)",
+        modalLetterStreakDesc: "Max Letter Streak 🔤",
+        modalWordStreakDesc: "Max Word Streak 📖",
+        modalMistakesDesc: "Mistakes",
+        weakKeysTitle: "🎯 Weak Keys Analysis:",
+        weakKeysClean: "✨ <b>Flawless!</b> You made zero typing mistakes.",
+        modalRestart: "🚀 Play Again",
+        newRecord: "🎉 NEW HIGH SCORE RECORD ACHIEVED!",
+        ranks: {
+            godlike: {
+                title: "⚡ Godlike Speed!",
+                msg: "Your typing speed is extraordinary, rivaling professional esports players!",
+            },
+            master: {
+                title: "🚀 Typing Master",
+                msg: "Remarkable speed! You type significantly faster than average.",
+            },
+            pro: {
+                title: "🚗 Advanced Typist",
+                msg: "Great job! Your typing is super smooth, fluent, and productive.",
+            },
+            intermediate: {
+                title: "🚲 Intermediate",
+                msg: "Solid performance! Keep practicing to maintain your rhythm.",
+            },
+            beginner: {
+                title: "🐢 Novice Typist",
+                msg: "Good start! Practice 5 minutes daily for steady improvements.",
+            },
+        },
+        banners: {
+            overdrive: "💎 OVERDRIVE!",
+            unstoppable: "🔥 UNSTOPPABLE!",
+            sickCombo: "⚡ SICK COMBO!",
+            perfectWord: "✨ PERFECT WORD!",
+        },
+    },
+};
+
 const paragraphs = {
     id: [
         "Teknologi berkembang sangat cepat setiap harinya. Kemampuan mengetik dengan cepat dan akurat adalah salah satu keahlian dasar yang sangat berguna di era digital saat ini.",
@@ -36,6 +160,34 @@ const floatingContainer = document.getElementById(
     "floating-feedback-container",
 );
 
+// UI Translatable Tags
+const highScoreTitleTag = document.getElementById("high-score-title");
+const lblLanguage = document.getElementById("lbl-language");
+const lblTime = document.getElementById("lbl-time");
+const lblLetterStreak = document.getElementById("lbl-letter-streak");
+const lblWordStreak = document.getElementById("lbl-word-streak");
+const lblTimeStat = document.getElementById("lbl-time-stat");
+const lblAccuracyStat = document.getElementById("lbl-accuracy-stat");
+const lblMistakesStat = document.getElementById("lbl-mistakes-stat");
+const lblRestartBtn = document.getElementById("lbl-restart-btn");
+
+const audioModalTitle = document.getElementById("audio-modal-title");
+const audioModalSubtitle = document.getElementById("audio-modal-subtitle");
+const lblSoundToggle = document.getElementById("lbl-sound-toggle");
+const lblVolume = document.getElementById("lbl-volume");
+const lblSwitchType = document.getElementById("lbl-switch-type");
+const lblSaveAudioBtn = document.getElementById("lbl-save-audio-btn");
+
+const rankBadge = document.getElementById("rank-badge");
+const lblModalWpm = document.getElementById("lbl-modal-wpm");
+const lblModalAccuracy = document.getElementById("lbl-modal-accuracy");
+const lblModalCpm = document.getElementById("lbl-modal-cpm");
+const lblModalLetterStreak = document.getElementById("lbl-modal-letter-streak");
+const lblModalWordStreak = document.getElementById("lbl-modal-word-streak");
+const lblModalMistakes = document.getElementById("lbl-modal-mistakes");
+const lblWeakKeysTitle = document.getElementById("lbl-weak-keys-title");
+const lblModalRestartBtn = document.getElementById("lbl-modal-restart-btn");
+
 // Toolbar
 const langBtns = document.querySelectorAll(".lang-btn");
 const timeBtns = document.querySelectorAll(".time-btn");
@@ -70,11 +222,12 @@ const modalRestartBtn = document.getElementById("modal-restart-btn");
 const weakKeysList = document.getElementById("weak-keys-list");
 
 // ==========================================================
-// 3. STATE PERMAINAN & MULTIPLIER TIER
+// 3. STATE PERMAINAN
 // ==========================================================
 let currentLang = "id";
-let maxTime = 60;
+let maxTime = 60; // 15, 30, 60, atau 0 (0 = Mode Zen / Tanpa Batas Waktu)
 let timeLeft = maxTime;
+let timeElapsedZen = 0; // Penghitung waktu maju untuk mode Zen
 let timer = null;
 let charIndex = 0;
 let mistakes = 0;
@@ -85,14 +238,12 @@ let letterStreak = 0;
 let maxLetterStreak = 0;
 let wordStreak = 0;
 let maxWordStreak = 0;
-let multiplierLevel = 1; // 1x, 2x, 3x, 4x, 5x (MAX)
-let streakScoreInTier = 0; // Skor pengisi progress bar di tier aktif
-const TIER_THRESHOLD = 15; // Butuh 15 skor streak per level untuk naik tier
+let multiplierLevel = 1;
+let streakScoreInTier = 0;
+const TIER_THRESHOLD = 15;
 
 let currentWordHadMistake = false;
 let currentWordStartIndex = 0;
-
-// Analyzer Huruf Salah
 let errorKeyMap = {};
 
 // Audio Studio
@@ -102,7 +253,50 @@ let currentSwitch = "blue";
 let audioCtx = null;
 
 // ==========================================================
-// 4. WEB AUDIO SYNTHESIZER
+// 4. SISTEM I18N (UPDATE SELURUH BAHASA UI)
+// ==========================================================
+function applyLanguage(lang) {
+    currentLang = lang;
+    const t = i18n[lang];
+
+    // Header & High Score
+    highScoreTitleTag.innerText = t.highScoreTitle;
+    lblLanguage.innerText = t.language;
+    lblTime.innerText = t.time;
+
+    // Streak & Stats Card
+    lblLetterStreak.innerText = t.letterStreak;
+    lblWordStreak.innerText = t.wordStreak;
+    lblTimeStat.innerText = maxTime === 0 ? t.timeElapsed : t.timeLeft;
+    lblAccuracyStat.innerText = t.accuracy;
+    lblMistakesStat.innerText = t.mistakes;
+    lblRestartBtn.innerText = t.restartBtn;
+
+    // Audio Studio Modal
+    audioModalTitle.innerText = t.audioTitle;
+    audioModalSubtitle.innerText = t.audioSubtitle;
+    lblSoundToggle.innerText = t.soundToggle;
+    lblVolume.innerText = t.volume;
+    lblSwitchType.innerText = t.switchType;
+    lblSaveAudioBtn.innerText = t.saveAudio;
+
+    // Result Modal
+    rankBadge.innerText = t.resultBadge;
+    lblModalWpm.innerText = t.modalWpmDesc;
+    lblModalAccuracy.innerText = t.modalAccDesc;
+    lblModalCpm.innerText = t.modalCpmDesc;
+    lblModalLetterStreak.innerText = t.modalLetterStreakDesc;
+    lblModalWordStreak.innerText = t.modalWordStreakDesc;
+    lblModalMistakes.innerText = t.modalMistakesDesc;
+    lblWeakKeysTitle.innerText = t.weakKeysTitle;
+    lblModalRestartBtn.innerText = t.modalRestart;
+
+    updateAudioLabel();
+    updateStreakUI();
+}
+
+// ==========================================================
+// 5. WEB AUDIO SYNTHESIZER
 // ==========================================================
 function initAudio() {
     if (!audioCtx) {
@@ -110,7 +304,6 @@ function initAudio() {
     }
 }
 
-// Suara Ketikan Per Huruf
 function playKeySound(isError = false) {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
@@ -182,14 +375,13 @@ function playKeySound(isError = false) {
     }
 }
 
-// Suara Harmoni Kata Sempurna
 function playWordChime() {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
     if (audioCtx.state === "suspended") audioCtx.resume();
 
     const now = audioCtx.currentTime;
-    const frequencies = [523.25, 659.25, 783.99, 1046.5]; // Chord C Major E5 - G5 - C6
+    const frequencies = [523.25, 659.25, 783.99, 1046.5];
 
     frequencies.forEach((freq, index) => {
         const osc = audioCtx.createOscillator();
@@ -208,7 +400,6 @@ function playWordChime() {
     });
 }
 
-// Suara Ledakan Bass saat Streak Tinggi Hancur
 function playCrashSound(level) {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
@@ -231,11 +422,7 @@ function playCrashSound(level) {
     osc.stop(now + 0.35);
 }
 
-// ==========================================================
-// 5. GUNCANGAN LAYAR BERTINGKAT (DYNAMIC SHAKE)
-// ==========================================================
 function triggerDynamicShake(level) {
-    // Hapus kelas shake sebelumnya
     appContainer.classList.remove(
         "shake-sm",
         "shake-md",
@@ -248,7 +435,7 @@ function triggerDynamicShake(level) {
     let duration = 200;
 
     if (level >= 5) {
-        shakeClass = "shake-extreme"; // Berguncang hebat gempa!
+        shakeClass = "shake-extreme";
         duration = 500;
     } else if (level >= 4) {
         shakeClass = "shake-lg";
@@ -266,8 +453,9 @@ function triggerDynamicShake(level) {
 // 6. HIGH SCORE
 // ==========================================================
 function loadHighScore() {
+    const modeKey = maxTime === 0 ? "zen" : maxTime;
     const saved =
-        localStorage.getItem(`typesprint_high_${currentLang}_${maxTime}`) || 0;
+        localStorage.getItem(`typesprint_high_${currentLang}_${modeKey}`) || 0;
     highScoreValueTag.innerText = saved;
     return parseInt(saved, 10);
 }
@@ -275,8 +463,9 @@ function loadHighScore() {
 function checkAndSaveHighScore(currentWpm) {
     const currentHigh = loadHighScore();
     if (currentWpm > currentHigh) {
+        const modeKey = maxTime === 0 ? "zen" : maxTime;
         localStorage.setItem(
-            `typesprint_high_${currentLang}_${maxTime}`,
+            `typesprint_high_${currentLang}_${modeKey}`,
             currentWpm,
         );
         highScoreValueTag.innerText = currentWpm;
@@ -309,20 +498,28 @@ function loadParagraph() {
 }
 
 // ==========================================================
-// 8. TIMER & METRIK
+// 8. TIMER & METRIK (MENDUKUNG MODE COUNTDOWN & MODE ZEN)
 // ==========================================================
 function initTimer() {
-    if (timeLeft > 0) {
-        timeLeft--;
-        timeLeftTag.innerText = `${timeLeft}s`;
-        updateMetrics();
+    if (maxTime > 0) {
+        // Mode Countdown Standar (15s, 30s, 60s)
+        if (timeLeft > 0) {
+            timeLeft--;
+            timeLeftTag.innerText = `${timeLeft}s`;
+            updateMetrics();
+        } else {
+            finishGame();
+        }
     } else {
-        finishGame();
+        // Mode Zen (Tanpa Batas Waktu - Menghitung Maju)
+        timeElapsedZen++;
+        timeLeftTag.innerText = `${timeElapsedZen}s`;
+        updateMetrics();
     }
 }
 
 function updateMetrics() {
-    const timeElapsed = maxTime - timeLeft;
+    const timeElapsed = maxTime > 0 ? maxTime - timeLeft : timeElapsedZen;
     let wpm = 0;
     let cpm = 0;
 
@@ -356,18 +553,17 @@ function removeActiveCursor() {
 }
 
 // ==========================================================
-// 9. LOGIKA TIER MULTIPLIER & VISUAL STREAK
+// 9. LOGIKA TIER MULTIPLIER & STREAK UI
 // ==========================================================
 function addStreakPoints(points = 1) {
     streakScoreInTier += points;
 
-    // Jika progress bar di tier aktif penuh -> Naik ke Multiplier berikutnya
     if (streakScoreInTier >= TIER_THRESHOLD) {
         if (multiplierLevel < 5) {
             multiplierLevel++;
-            streakScoreInTier = 0; // Reset bar untuk mengisi tier selanjutnya
+            streakScoreInTier = 0;
         } else {
-            streakScoreInTier = TIER_THRESHOLD; // Max tier 5x
+            streakScoreInTier = TIER_THRESHOLD;
         }
     }
 
@@ -385,22 +581,20 @@ function updateStreakUI() {
     letterStreakVal.innerText = letterStreak;
     wordStreakVal.innerText = wordStreak;
 
-    // Update Multiplier Label & Class
+    const t = i18n[currentLang];
     comboMultiplierTag.className = `multiplier-pill tier-${multiplierLevel}`;
     if (multiplierLevel >= 5) {
-        comboMultiplierTag.innerText = "5x OVERDRIVE 🔥";
+        comboMultiplierTag.innerText = `5x ${t.overdrive}`;
         appContainer.classList.add("overdrive-mode");
     } else {
-        comboMultiplierTag.innerText = `${multiplierLevel}x MULTIPLIER`;
+        comboMultiplierTag.innerText = `${multiplierLevel}x ${t.multiplier}`;
         appContainer.classList.remove("overdrive-mode");
     }
 
-    // Progress bar percentage di dalam tier aktif
     const percent = Math.min(100, (streakScoreInTier / TIER_THRESHOLD) * 100);
     comboBar.style.width = multiplierLevel >= 5 ? "100%" : `${percent}%`;
 }
 
-// 1. Partikel Angka Melayang (+1) Tepat di Atas Huruf
 function spawnCharSparkle(targetElement) {
     if (!targetElement) return;
     const rect = targetElement.getBoundingClientRect();
@@ -409,8 +603,6 @@ function spawnCharSparkle(targetElement) {
     const sparkle = document.createElement("span");
     sparkle.className = "char-sparkle";
     sparkle.innerText = `+${multiplierLevel}`;
-
-    // Posisikan tepat di atas karakter yang diketik
     sparkle.style.left = `${rect.left - boxRect.left}px`;
     sparkle.style.top = `${rect.top - boxRect.top - 14}px`;
 
@@ -418,7 +610,6 @@ function spawnCharSparkle(targetElement) {
     setTimeout(() => sparkle.remove(), 600);
 }
 
-// 2. Banner Pop-Up Per Kata
 function showWordBanner(message) {
     const banner = document.createElement("div");
     banner.className = "floating-word-banner";
@@ -469,7 +660,7 @@ function handleTyping() {
         }
     }
     // Karakter Baru
-    else if (charIndex < characters.length && timeLeft > 0) {
+    else if (charIndex < characters.length) {
         const expectedChar = characters[charIndex].getAttribute("data-char");
 
         if (currentTypedChar === expectedChar) {
@@ -477,15 +668,12 @@ function handleTyping() {
             characters[charIndex].classList.remove("incorrect");
             playKeySound(false);
 
-            // Partikel +1 per huruf
             spawnCharSparkle(characters[charIndex]);
 
-            // Tambah Streak Huruf & Poin Tier
             letterStreak++;
             if (letterStreak > maxLetterStreak) maxLetterStreak = letterStreak;
             addStreakPoints(1);
 
-            // Cek Selesai Kata
             const isSpace = expectedChar === " ";
             const isLastChar = charIndex === characters.length - 1;
 
@@ -498,16 +686,18 @@ function handleTyping() {
 
                     playWordChime();
                     highlightCompletedWord(currentWordStartIndex, wordEndIndex);
-                    addStreakPoints(3); // Bonus 3 poin untuk kata sempurna!
+                    addStreakPoints(3);
 
-                    // Pesan Banner Keren
+                    const banners = i18n[currentLang].banners;
                     if (multiplierLevel >= 5)
-                        showWordBanner(`💎 OVERDRIVE! (${wordStreak} Words)`);
+                        showWordBanner(`${banners.overdrive} (${wordStreak})`);
                     else if (multiplierLevel >= 4)
-                        showWordBanner(`🔥 UNSTOPPABLE! (${wordStreak} Words)`);
+                        showWordBanner(
+                            `${banners.unstoppable} (${wordStreak})`,
+                        );
                     else if (multiplierLevel >= 3)
-                        showWordBanner(`⚡ SICK COMBO! (${wordStreak} Words)`);
-                    else showWordBanner(`✨ PERFECT WORD!`);
+                        showWordBanner(`${banners.sickCombo} (${wordStreak})`);
+                    else showWordBanner(banners.perfectWord);
                 } else {
                     wordStreak = 0;
                 }
@@ -524,7 +714,6 @@ function handleTyping() {
             const targetChar = expectedChar.toLowerCase();
             errorKeyMap[targetChar] = (errorKeyMap[targetChar] || 0) + 1;
 
-            // 🌋 Guncangkan Layar Sesuai Multiplier Level yang Hancur!
             triggerDynamicShake(multiplierLevel);
 
             currentWordHadMistake = true;
@@ -537,9 +726,10 @@ function handleTyping() {
     }
 
     removeActiveCursor();
-    if (charIndex < characters.length && timeLeft > 0) {
+    if (charIndex < characters.length) {
         characters[charIndex].classList.add("active");
     } else if (charIndex >= characters.length) {
+        // Paragraf selesai diketik -> Langsung akhiri game (termasuk pada mode Zen)
         finishGame();
     }
 
@@ -556,34 +746,17 @@ function finishGame() {
 
     const finalStats = updateMetrics();
     const isNewRecord = checkAndSaveHighScore(finalStats.wpm);
+    const t = i18n[currentLang];
 
-    let rankTitle = "";
-    let rankMessage = "";
+    let rankObj = t.ranks.beginner;
+    if (finalStats.wpm >= 90) rankObj = t.ranks.godlike;
+    else if (finalStats.wpm >= 70) rankObj = t.ranks.master;
+    else if (finalStats.wpm >= 50) rankObj = t.ranks.pro;
+    else if (finalStats.wpm >= 30) rankObj = t.ranks.intermediate;
 
-    if (finalStats.wpm >= 90) {
-        rankTitle = "⚡ Dewa Ketik!";
-        rankMessage =
-            "Kecepatan jarimu luar biasa spektakuler setara profesional esports!";
-    } else if (finalStats.wpm >= 70) {
-        rankTitle = "🚀 Master Ketik";
-        rankMessage =
-            "Kecepatanmu sangat mengesankan di atas rata-rata pengguna umum!";
-    } else if (finalStats.wpm >= 50) {
-        rankTitle = "🚗 Pengetik Mahir";
-        rankMessage =
-            "Kerja bagus! Kecepatan mengetikmu sudah sangat lancar dan produktif.";
-    } else if (finalStats.wpm >= 30) {
-        rankTitle = "🚲 Tingkat Menengah";
-        rankMessage =
-            "Kemampuan yang solid! Terus berlatih untuk meningkatkan akurasi dan ritme.";
-    } else {
-        rankTitle = "🐢 Pengetik Pemula";
-        rankMessage =
-            "Awal yang baik! Luangkan waktu latihan 5 menit setiap hari untuk hasil maksimal.";
-    }
-
+    let msg = rankObj.msg;
     if (isNewRecord && finalStats.wpm > 0) {
-        rankMessage += " 🎉 REKOR TERBARU BERHASIL DIPECAHKAN!";
+        msg += ` ${t.newRecord}`;
     }
 
     modalWpm.innerText = finalStats.wpm;
@@ -592,8 +765,8 @@ function finishGame() {
     modalLetterStreak.innerText = maxLetterStreak;
     modalWordStreak.innerText = maxWordStreak;
     modalMistakes.innerText = mistakes;
-    modalRankTitle.innerText = rankTitle;
-    modalMessage.innerText = rankMessage;
+    modalRankTitle.innerText = rankObj.title;
+    modalMessage.innerText = msg;
 
     const sortedErrors = Object.entries(errorKeyMap).sort(
         (a, b) => b[1] - a[1],
@@ -601,15 +774,14 @@ function finishGame() {
     if (sortedErrors.length > 0) {
         weakKeysList.innerHTML = "";
         sortedErrors.slice(0, 4).forEach(([char, count]) => {
-            const displayChar = char === " " ? "SPASI" : char.toUpperCase();
+            const displayChar = char === " " ? "SPACE" : char.toUpperCase();
             const tag = document.createElement("span");
             tag.className = "weak-key-tag";
             tag.innerText = `${displayChar} (${count}x)`;
             weakKeysList.appendChild(tag);
         });
     } else {
-        weakKeysList.innerHTML =
-            "✨ <b>Sempurna!</b> Kamu tidak melakukan salah ketik sama sekali.";
+        weakKeysList.innerHTML = t.weakKeysClean;
     }
 
     resultModal.classList.add("show");
@@ -623,6 +795,7 @@ function resetGame() {
     resultModal.classList.remove("show");
 
     timeLeft = maxTime;
+    timeElapsedZen = 0;
     charIndex = 0;
     mistakes = 0;
     isTyping = false;
@@ -642,7 +815,9 @@ function resetGame() {
     inputField.value = "";
     floatingContainer.innerHTML = "";
 
-    timeLeftTag.innerText = `${maxTime}s`;
+    const t = i18n[currentLang];
+    lblTimeStat.innerText = maxTime === 0 ? t.timeElapsed : t.timeLeft;
+    timeLeftTag.innerText = maxTime === 0 ? "0s" : `${maxTime}s`;
     wpmTag.innerText = "0";
     cpmTag.innerText = "0";
     accuracyTag.innerText = "100%";
@@ -654,7 +829,7 @@ function resetGame() {
 }
 
 // ==========================================================
-// 13. EVENT LISTENERS & AUDIO CONTROLS
+// 13. EVENT LISTENERS
 // ==========================================================
 inputField.addEventListener("input", handleTyping);
 typingBox.addEventListener("click", () => inputField.focus());
@@ -662,15 +837,18 @@ typingBox.addEventListener("click", () => inputField.focus());
 restartBtn.addEventListener("click", resetGame);
 modalRestartBtn.addEventListener("click", resetGame);
 
+// Toggle Bahasa
 langBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
         langBtns.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
-        currentLang = btn.getAttribute("data-lang");
+        const lang = btn.getAttribute("data-lang");
+        applyLanguage(lang);
         resetGame();
     });
 });
 
+// Toggle Durasi Waktu (Termasuk Mode Zen 0)
 timeBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
         timeBtns.forEach((b) => b.classList.remove("active"));
@@ -723,6 +901,7 @@ function updateAudioLabel() {
     }
 }
 
-// Inisialisasi Pertama Kali
+// Inisialisasi
+applyLanguage("id");
 loadHighScore();
 loadParagraph();
