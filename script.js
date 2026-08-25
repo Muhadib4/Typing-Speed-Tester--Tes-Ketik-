@@ -454,6 +454,113 @@ function playHorrorDropSound(lvl) {
     osc.stop(now + 0.45);
 }
 
+// Suara khusus saat multiplier berpindah satu level
+function playStreakLevelSound(newLevel, oldLevel) {
+    if (!isSoundEnabled || audioVolume <= 0 || newLevel === oldLevel) return;
+    initAudio();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+
+    const now = audioCtx.currentTime;
+
+    if (newLevel > oldLevel) {
+        const base = 300 + Math.max(1, newLevel) * 42;
+        [1, 1.25, 1.5].forEach((ratio, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = index === 2 ? "triangle" : "sine";
+            osc.frequency.setValueAtTime(base * ratio, now + index * 0.055);
+            gain.gain.setValueAtTime(audioVolume * 0.2, now + index * 0.055);
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + index * 0.055 + 0.22,
+            );
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + index * 0.055);
+            osc.stop(now + index * 0.055 + 0.22);
+        });
+    } else {
+        const depth = Math.min(10, Math.abs(newLevel));
+        [0, 0.08].forEach((delay, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = index === 0 ? "sawtooth" : "triangle";
+            osc.frequency.setValueAtTime(170 - depth * 7, now + delay);
+            osc.frequency.exponentialRampToValueAtTime(
+                Math.max(38, 92 - depth * 5),
+                now + delay + 0.28,
+            );
+            gain.gain.setValueAtTime(audioVolume * 0.18, now + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + delay);
+            osc.stop(now + delay + 0.3);
+        });
+    }
+}
+
+function playVictorySound() {
+    if (!isSoundEnabled || audioVolume <= 0) return;
+    initAudio();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+
+    const now = audioCtx.currentTime;
+    const melody = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+
+    melody.forEach((frequency, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = index < 3 ? "triangle" : "sine";
+        osc.frequency.setValueAtTime(frequency, now + index * 0.11);
+        gain.gain.setValueAtTime(audioVolume * 0.24, now + index * 0.11);
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            now + index * 0.11 + 0.65,
+        );
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + index * 0.11);
+        osc.stop(now + index * 0.11 + 0.65);
+    });
+
+    [261.63, 392, 523.25].forEach((frequency) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(frequency, now + 0.62);
+        gain.gain.setValueAtTime(audioVolume * 0.12, now + 0.62);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.7);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + 0.62);
+        osc.stop(now + 1.7);
+    });
+}
+
+function playFailureSound() {
+    if (!isSoundEnabled || audioVolume <= 0) return;
+    initAudio();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+
+    const now = audioCtx.currentTime;
+    [246.94, 196, 146.83].forEach((frequency, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(frequency, now + index * 0.16);
+        gain.gain.setValueAtTime(audioVolume * 0.2, now + index * 0.16);
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            now + index * 0.16 + 0.38,
+        );
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + index * 0.16);
+        osc.stop(now + index * 0.16 + 0.38);
+    });
+}
+
 // ==========================================================
 // 6. GUNCANGAN LAYAR BERTINGKAT (DYNAMIC SHAKE)
 // ==========================================================
@@ -591,42 +698,48 @@ function removeActiveCursor() {
 
 // Naikkan Poin (Saat Ketik Benar)
 function addDimensionPoints(pts = 1) {
+    const previousLevel = multiplierLevel;
     streakPointsInTier += pts;
 
     if (streakPointsInTier >= TIER_THRESHOLD) {
         streakPointsInTier = 0;
         if (multiplierLevel < 0) {
-            // Jika di dimensi Backrooms (-), naik mendekati dunia normal
             multiplierLevel = multiplierLevel === -1 ? 1 : multiplierLevel + 1;
         } else if (multiplierLevel < 10) {
-            // Jika di dimensi normal (+), naik menuju +10x
             multiplierLevel++;
         }
     }
 
+    if (multiplierLevel !== previousLevel) {
+        playStreakLevelSound(multiplierLevel, previousLevel);
+    }
     updateStreakDimensionUI();
 }
 
 // Kurangi Poin (Saat Salah Ketik / Backspace)
 function deductDimensionPoints(penalty = 3) {
+    const previousLevel = multiplierLevel;
     streakPointsInTier -= penalty;
 
     if (streakPointsInTier < 0) {
         streakPointsInTier = TIER_THRESHOLD - 2;
         if (multiplierLevel > 1) {
-            multiplierLevel--; // Turun tier positif
+            multiplierLevel--;
         } else if (multiplierLevel === 1) {
-            multiplierLevel = -1; // MASUK KE BACKROOMS LEVEL -1!
+            multiplierLevel = -1;
         } else if (multiplierLevel > -10) {
-            multiplierLevel--; // Masuk lebih dalam ke Backrooms (-2, -3 ... -10)
+            multiplierLevel--;
         }
     }
 
+    if (multiplierLevel !== previousLevel) {
+        playStreakLevelSound(multiplierLevel, previousLevel);
+    }
     updateStreakDimensionUI();
 }
 
 /* ==========================================================
-   GALAXY CANVAS — KHUSUS CELESTIAL STREAK +10X
+   GALAXY CANVAS — INTENSITAS BERUBAH DARI +1 SAMPAI +10
    ========================================================== */
 const celestialCanvas = document.getElementById("celestial-canvas");
 const celestialCtx = celestialCanvas?.getContext("2d");
@@ -635,6 +748,7 @@ let celestialStars = [];
 let celestialMeteors = [];
 let celestialAnimationId = null;
 let celestialCanvasActive = false;
+let celestialLevel = 0;
 let celestialPointer = {
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
@@ -649,35 +763,43 @@ function resizeCelestialCanvas() {
     celestialCanvas.style.width = `${window.innerWidth}px`;
     celestialCanvas.style.height = `${window.innerHeight}px`;
     celestialCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
     createCelestialParticles();
 }
 
 function createCelestialParticles() {
     const starCount = Math.min(
-        220,
-        Math.max(100, Math.floor((window.innerWidth * window.innerHeight) / 6500)),
+        260,
+        55 + celestialLevel * 19,
     );
 
     celestialStars = Array.from({ length: starCount }, () => ({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        size: Math.random() * 1.8 + 0.25,
-        speed: Math.random() * 0.5,
-        alpha: Math.random() * 0.65 + 0.25,
+        size: Math.random() * (0.8 + celestialLevel * 0.11) + 0.2,
+        speed: Math.random() * (0.15 + celestialLevel * 0.035),
+        alpha: Math.random() * 0.62 + 0.2,
         twinkle: Math.random() * Math.PI * 2,
+        hue: 185 + Math.random() * (celestialLevel * 12),
     }));
 
-    celestialMeteors = Array.from({ length: 2 }, () => createCelestialMeteor(true));
+    const meteorCount =
+        celestialLevel >= 10 ? 3 :
+        celestialLevel >= 8 ? 2 :
+        celestialLevel >= 6 ? 1 : 0;
+
+    celestialMeteors = Array.from(
+        { length: meteorCount },
+        () => createCelestialMeteor(true),
+    );
 }
 
 function createCelestialMeteor(randomStart = false) {
     return {
         x: Math.random() * window.innerWidth,
         y: randomStart ? Math.random() * window.innerHeight : -120,
-        speed: Math.random() * 5 + 5,
-        length: Math.random() * 80 + 65,
-        delay: randomStart ? Math.random() * 180 : Math.random() * 260 + 100,
+        speed: Math.random() * 4 + 4 + celestialLevel * 0.2,
+        length: Math.random() * 75 + 55 + celestialLevel * 3,
+        delay: randomStart ? Math.random() * 220 : Math.random() * 260 + 80,
     };
 }
 
@@ -686,31 +808,32 @@ function drawCelestialCanvas() {
 
     celestialCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-    // Gerakan mengikuti cursor — sama seperti background pada ZIP.
-    // Semakin jauh cursor dari tengah layar, semakin kuat galaksi bergeser.
+    const strength = 0.012 + celestialLevel * 0.0038;
     const cursorShiftX =
-        (celestialPointer.x - window.innerWidth / 2) * 0.05;
+        (celestialPointer.x - window.innerWidth / 2) * strength;
     const cursorShiftY =
-        (celestialPointer.y - window.innerHeight / 2) * 0.05;
+        (celestialPointer.y - window.innerHeight / 2) * strength;
 
     celestialStars.forEach((star) => {
         star.x -= cursorShiftX * star.speed;
         star.y -= cursorShiftY * star.speed;
-        star.twinkle += 0.025;
+        star.twinkle += 0.018 + celestialLevel * 0.0015;
 
-        if (star.x < -5) star.x = window.innerWidth + 5;
-        if (star.x > window.innerWidth + 5) star.x = -5;
-        if (star.y < -5) star.y = window.innerHeight + 5;
-        if (star.y > window.innerHeight + 5) star.y = -5;
+        if (star.x < -8) star.x = window.innerWidth + 8;
+        if (star.x > window.innerWidth + 8) star.x = -8;
+        if (star.y < -8) star.y = window.innerHeight + 8;
+        if (star.y > window.innerHeight + 8) star.y = -8;
 
         const glow = Math.max(
-            0.15,
-            star.alpha + Math.sin(star.twinkle) * 0.18,
+            0.12,
+            star.alpha + Math.sin(star.twinkle) * (0.08 + celestialLevel * 0.012),
         );
         celestialCtx.beginPath();
-        celestialCtx.fillStyle = `rgba(255, 255, 255, ${glow})`;
-        celestialCtx.shadowColor = "rgba(125, 211, 252, 0.85)";
-        celestialCtx.shadowBlur = star.size * 5;
+        celestialCtx.fillStyle =
+            `hsla(${star.hue}, 95%, 88%, ${glow})`;
+        celestialCtx.shadowColor =
+            `hsla(${star.hue}, 95%, 72%, 0.8)`;
+        celestialCtx.shadowBlur = star.size * (2 + celestialLevel * 0.45);
         celestialCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         celestialCtx.fill();
     });
@@ -729,12 +852,13 @@ function drawCelestialCanvas() {
             meteor.x + meteor.length,
             meteor.y - meteor.length,
         );
-        gradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
-        gradient.addColorStop(1, "rgba(125, 211, 252, 0)");
+        gradient.addColorStop(0, "rgba(255, 255, 255, 0.95)");
+        gradient.addColorStop(0.35, "rgba(103, 232, 249, 0.7)");
+        gradient.addColorStop(1, "rgba(192, 132, 252, 0)");
 
         celestialCtx.beginPath();
         celestialCtx.strokeStyle = gradient;
-        celestialCtx.lineWidth = 1.4;
+        celestialCtx.lineWidth = 1.2 + celestialLevel * 0.04;
         celestialCtx.moveTo(meteor.x, meteor.y);
         celestialCtx.lineTo(
             meteor.x + meteor.length,
@@ -745,7 +869,10 @@ function drawCelestialCanvas() {
         meteor.x -= meteor.speed;
         meteor.y += meteor.speed;
 
-        if (meteor.y > window.innerHeight + meteor.length || meteor.x < -meteor.length) {
+        if (
+            meteor.y > window.innerHeight + meteor.length ||
+            meteor.x < -meteor.length
+        ) {
             celestialMeteors[index] = createCelestialMeteor();
         }
     });
@@ -753,17 +880,26 @@ function drawCelestialCanvas() {
     celestialAnimationId = requestAnimationFrame(drawCelestialCanvas);
 }
 
-function setCelestialCanvasActive(active) {
-    if (!celestialCanvas || !celestialCtx || celestialCanvasActive === active) {
+function setCelestialCanvasLevel(level) {
+    if (!celestialCanvas || !celestialCtx) return;
+
+    const nextLevel = Math.max(0, Math.min(10, level));
+    if (nextLevel === celestialLevel && celestialCanvasActive === (nextLevel > 0)) {
         return;
     }
 
-    celestialCanvasActive = active;
+    celestialLevel = nextLevel;
 
-    if (active) {
-        resizeCelestialCanvas();
-        drawCelestialCanvas();
+    if (nextLevel > 0) {
+        if (!celestialCanvasActive) {
+            celestialCanvasActive = true;
+            resizeCelestialCanvas();
+            drawCelestialCanvas();
+        } else {
+            createCelestialParticles();
+        }
     } else {
+        celestialCanvasActive = false;
         cancelAnimationFrame(celestialAnimationId);
         celestialAnimationId = null;
         celestialCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -779,51 +915,162 @@ window.addEventListener("pointermove", (event) => {
     celestialPointer.y = event.clientY;
 });
 
+/* ==========================================================
+   MEGA CONFETTI — KHUSUS HASIL MENANG
+   ========================================================== */
+const celebrationCanvas = document.getElementById("celebration-canvas");
+const celebrationCtx = celebrationCanvas?.getContext("2d");
+let confettiPieces = [];
+let confettiAnimationId = null;
+let confettiBurstTimers = [];
+
+const confettiColors = [
+    "#67e8f9",
+    "#38bdf8",
+    "#a78bfa",
+    "#c084fc",
+    "#f472b6",
+    "#fbbf24",
+    "#ffffff",
+];
+
+function resizeCelebrationCanvas() {
+    if (!celebrationCanvas || !celebrationCtx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    celebrationCanvas.width = Math.floor(window.innerWidth * dpr);
+    celebrationCanvas.height = Math.floor(window.innerHeight * dpr);
+    celebrationCanvas.style.width = `${window.innerWidth}px`;
+    celebrationCanvas.style.height = `${window.innerHeight}px`;
+    celebrationCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function addConfettiBurst(count, originX, originY) {
+    for (let i = 0; i < count; i++) {
+        const angle = -Math.PI + Math.random() * Math.PI;
+        const power = Math.random() * 12 + 8;
+        confettiPieces.push({
+            x: originX,
+            y: originY,
+            vx: Math.cos(angle) * power + (Math.random() - 0.5) * 5,
+            vy: Math.sin(angle) * power - Math.random() * 5,
+            gravity: Math.random() * 0.12 + 0.12,
+            drag: Math.random() * 0.012 + 0.982,
+            width: Math.random() * 8 + 5,
+            height: Math.random() * 5 + 3,
+            rotation: Math.random() * Math.PI,
+            spin: (Math.random() - 0.5) * 0.35,
+            color: confettiColors[
+                Math.floor(Math.random() * confettiColors.length)
+            ],
+            life: Math.random() * 130 + 150,
+        });
+    }
+}
+
+function animateMegaConfetti() {
+    if (!celebrationCtx) return;
+    celebrationCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    confettiPieces = confettiPieces.filter((piece) => piece.life > 0);
+    confettiPieces.forEach((piece) => {
+        piece.vx *= piece.drag;
+        piece.vy += piece.gravity;
+        piece.x += piece.vx;
+        piece.y += piece.vy;
+        piece.rotation += piece.spin;
+        piece.life--;
+
+        celebrationCtx.save();
+        celebrationCtx.translate(piece.x, piece.y);
+        celebrationCtx.rotate(piece.rotation);
+        celebrationCtx.globalAlpha = Math.min(1, piece.life / 45);
+        celebrationCtx.fillStyle = piece.color;
+        celebrationCtx.fillRect(
+            -piece.width / 2,
+            -piece.height / 2,
+            piece.width,
+            piece.height,
+        );
+        celebrationCtx.restore();
+    });
+
+    if (confettiPieces.length > 0) {
+        confettiAnimationId = requestAnimationFrame(animateMegaConfetti);
+    } else {
+        celebrationCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        confettiAnimationId = null;
+    }
+}
+
+function stopMegaConfetti() {
+    confettiBurstTimers.forEach(clearTimeout);
+    confettiBurstTimers = [];
+    cancelAnimationFrame(confettiAnimationId);
+    confettiAnimationId = null;
+    confettiPieces = [];
+    celebrationCtx?.clearRect(0, 0, window.innerWidth, window.innerHeight);
+}
+
+function launchMegaConfetti() {
+    if (!celebrationCanvas || !celebrationCtx) return;
+    stopMegaConfetti();
+    resizeCelebrationCanvas();
+
+    const bursts = [
+        { delay: 0, count: 240, x: 0.05, y: 0.82 },
+        { delay: 320, count: 220, x: 0.95, y: 0.82 },
+        { delay: 650, count: 200, x: 0.5, y: 0.72 },
+        { delay: 980, count: 180, x: 0.25, y: 0.35 },
+        { delay: 1250, count: 180, x: 0.75, y: 0.35 },
+    ];
+
+    bursts.forEach((burst) => {
+        const timerId = setTimeout(() => {
+            addConfettiBurst(
+                burst.count,
+                window.innerWidth * burst.x,
+                window.innerHeight * burst.y,
+            );
+            if (!confettiAnimationId) animateMegaConfetti();
+        }, burst.delay);
+        confettiBurstTimers.push(timerId);
+    });
+}
+
+window.addEventListener("resize", () => {
+    if (confettiPieces.length > 0) resizeCelebrationCanvas();
+});
+
 function updateStreakDimensionUI() {
     letterStreakVal.innerText = letterStreak;
     wordStreakVal.innerText = wordStreak;
 
     const t = i18n[currentLang];
 
-    // 1. BERSIHKAN SEMUA KELAS SEBELUMNYA
+    // Bersihkan dimensi sebelumnya agar animasi tidak menumpuk.
     bodyRoot.className = "";
-    setCelestialCanvasActive(false);
+    setCelestialCanvasLevel(0);
     appContainer.classList.remove("celestial-10x-mode", "backrooms-corrupted");
     comboBar.classList.remove("bar-horror");
 
-    // 2. SISI POSITIF (+1 s/d +10)
+    // SISI POSITIF: background dan intensitas berubah pada SETIAP +1.
     if (multiplierLevel > 0) {
         letterStreakIcon.innerText = "🔤";
         wordStreakIcon.innerText = "📖";
-        comboMultiplierTag.className = `multiplier-pill tier-pos-${multiplierLevel}`;
+        comboMultiplierTag.className =
+            `multiplier-pill tier-pos-${multiplierLevel}`;
 
-        // Pasang kelas background setiap 2 level (2, 4, 6, 8, 10)
-        // Level 1 & 3 & 5 & 7 & 9: pakai background level sebelumnya (roundDown ke genap)
-        const bgLevel =
-            multiplierLevel >= 10
-                ? 10
-                : multiplierLevel >= 8
-                    ? 8
-                    : multiplierLevel >= 6
-                        ? 6
-                        : multiplierLevel >= 4
-                            ? 4
-                            : multiplierLevel >= 2
-                                ? 2
-                                : 0; // Level 1: tidak ada background khusus
-
-        if (bgLevel > 0) {
-            bodyRoot.classList.add(`streak-pos-${bgLevel}`);
-        }
+        bodyRoot.classList.add(`streak-pos-${multiplierLevel}`);
+        setCelestialCanvasLevel(multiplierLevel);
 
         if (multiplierLevel === 10) {
             comboMultiplierTag.innerText = t.celestial10x;
             bodyRoot.classList.add("mode-celestial");
-            setCelestialCanvasActive(true);
             appContainer.classList.add("celestial-10x-mode");
             comboBar.style.width = "100%";
         } else {
-            comboMultiplierTag.innerText = `${multiplierLevel}x ${t.multiplier}`;
+            comboMultiplierTag.innerText =
+                `${multiplierLevel}x ${t.multiplier}`;
             const percent = Math.min(
                 100,
                 (streakPointsInTier / TIER_THRESHOLD) * 100,
@@ -1018,6 +1265,9 @@ function finishGame() {
     const isNewRecord = checkAndSaveHighScore(finalStats.wpm);
     const t = i18n[currentLang];
 
+    // Menang jika pemain benar-benar mengetik dan akurasi minimal 80%.
+    const isWinner = charIndex > 0 && finalStats.accuracy >= 80;
+
     let rankObj = t.ranks.beginner;
     if (finalStats.wpm >= 90) rankObj = t.ranks.godlike;
     else if (finalStats.wpm >= 70) rankObj = t.ranks.master;
@@ -1054,7 +1304,25 @@ function finishGame() {
         weakKeysList.innerHTML = t.weakKeysClean;
     }
 
-    resultModal.classList.add("show");
+    resultModal.classList.remove("result-win", "result-fail");
+    resultModal.classList.add(
+        "show",
+        isWinner ? "result-win" : "result-fail",
+    );
+    rankBadge.innerText = isWinner
+        ? currentLang === "id"
+            ? "🏆 MENANG!"
+            : "🏆 VICTORY!"
+        : currentLang === "id"
+          ? "💫 COBA LAGI"
+          : "💫 TRY AGAIN";
+
+    if (isWinner) {
+        playVictorySound();
+        launchMegaConfetti();
+    } else {
+        playFailureSound();
+    }
 }
 
 // ==========================================================
@@ -1062,7 +1330,8 @@ function finishGame() {
 // ==========================================================
 function resetGame() {
     clearInterval(timer);
-    resultModal.classList.remove("show");
+    resultModal.classList.remove("show", "result-win", "result-fail");
+    stopMegaConfetti();
 
     timeLeft = maxTime;
     timeElapsedZen = 0;
