@@ -1049,7 +1049,6 @@ function updateStreakDimensionUI() {
 
     // Bersihkan dimensi sebelumnya agar animasi tidak menumpuk.
     bodyRoot.className = "";
-    setCelestialCanvasLevel(0);
     appContainer.classList.remove("celestial-10x-mode", "backrooms-corrupted");
     comboBar.classList.remove("bar-horror");
 
@@ -1080,6 +1079,7 @@ function updateStreakDimensionUI() {
     }
     // 3. SISI NEGATIF BACKROOMS (-1 s/d -10)
     else {
+        setCelestialCanvasLevel(0);
         const horrorLvl = Math.abs(multiplierLevel);
         letterStreakIcon.innerText = "💀";
         wordStreakIcon.innerText = "🩸";
