@@ -421,40 +421,34 @@ body {
     letter-spacing: 0.5px;
     user-select: none;
     word-break: break-word;
+    white-space: pre-wrap; /* 🌟 KUNCI: Menjaga karakter spasi agar tidak diciutkan oleh browser */
 }
 
 /* Status Karakter */
 .char {
     position: relative;
-    display: inline-block;
+    display: inline; /* Ubah ke inline agar spasi menyatu sempurna */
     color: var(--char-default);
     transition:
         color 0.08s ease,
-        background-color 0.08s ease,
-        transform 0.1s ease;
+        background-color 0.08s ease;
 }
 
 /* Animasi Pop-in pada Huruf Benar */
 .char.correct {
     color: var(--char-correct);
-    animation: charPop 0.15s ease-out;
-}
-
-@keyframes charPop {
-    0% {
-        transform: scale(1.35);
-        filter: brightness(1.6);
-    }
-    100% {
-        transform: scale(1);
-        filter: brightness(1);
-    }
 }
 
 .char.incorrect {
     color: var(--char-incorrect);
     background-color: var(--char-error-bg);
     border-radius: 3px;
+}
+
+/* Jika yang salah ketik adalah spasi, beri garis bawah merah */
+.char[data-char=" "].incorrect {
+    background-color: rgba(248, 113, 113, 0.4);
+    border-bottom: 2px solid var(--char-incorrect);
 }
 
 .char.active {

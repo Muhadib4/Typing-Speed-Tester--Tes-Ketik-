@@ -237,6 +237,7 @@ function checkAndSaveHighScore(currentWpm) {
 // ==========================================================
 // 6. MEMUAT PARAGRAF
 // ==========================================================
+
 function loadParagraph() {
     const textList = paragraphs[currentLang];
     const randomIndex = Math.floor(Math.random() * textList.length);
@@ -246,7 +247,8 @@ function loadParagraph() {
     selectedText.split("").forEach((char) => {
         const span = document.createElement("span");
         span.className = "char";
-        span.innerText = char;
+        span.textContent = char; // 🌟 Gunakan textContent (tidak memangkas spasi)
+        span.setAttribute("data-char", char); // 🌟 Simpan karakter asli di atribut
         textDisplay.appendChild(span);
     });
 
@@ -380,7 +382,7 @@ function handleTyping() {
     }
     // Karakter Baru Diketik
     else if (charIndex < characters.length && timeLeft > 0) {
-        const expectedChar = characters[charIndex].innerText;
+        const expectedChar = characters[charIndex].getAttribute("data-char");
 
         if (currentTypedChar === expectedChar) {
             characters[charIndex].classList.add("correct");
