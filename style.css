@@ -242,19 +242,41 @@ body.backrooms-lvl-10 {
     transition: opacity 0.8s ease;
 }
 
+/* GALAXY CANVAS — aktif khusus saat streak +10x */
+#celestial-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+body.mode-celestial #celestial-canvas {
+    opacity: 1;
+}
+
 body.mode-celestial .celestial-bg {
     opacity: 1;
     background:
-        radial-gradient(
-            circle at 30% 40%,
-            rgba(56, 189, 248, 0.15),
-            transparent 60%
+        linear-gradient(
+            217deg,
+            rgba(125, 211, 252, 0.22),
+            transparent 70.71%
         ),
-        radial-gradient(
-            circle at 70% 60%,
-            rgba(236, 72, 153, 0.12),
-            transparent 60%
+        linear-gradient(
+            127deg,
+            rgba(192, 132, 252, 0.2),
+            transparent 70.71%
+        ),
+        linear-gradient(
+            336deg,
+            rgba(244, 114, 182, 0.18),
+            transparent 70.71%
         );
+    filter: blur(35px);
     animation: cosmicOverlayFlow 6s ease infinite alternate;
 }
 
