@@ -3,24 +3,47 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Typing Speed Tester</title>
-        <!-- Google Fonts: Mengambil font modern Inter dan JetBrains Mono untuk tampilan teks koding/ketik -->
+        <title>Typing Speed Tester Pro</title>
+        <!-- Google Fonts: Inter & JetBrains Mono -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
             rel="stylesheet"
         />
-        <!-- Menghubungkan file CSS -->
+        <!-- File CSS -->
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
         <div class="container">
-            <!-- Header / Judul Aplikasi -->
+            <!-- Header Aplikasi & High Score -->
             <header class="header">
-                <h1>⚡ TypeSprint</h1>
-                <p>Uji kecepatan dan akurasi mengetikmu dalam 60 detik!</p>
+                <div class="header-top">
+                    <h1>⚡ TypeSprint Pro</h1>
+                    <!-- Tombol Toggle Suara Suara Mechanical Keyboard -->
+                    <button
+                        id="sound-btn"
+                        class="icon-btn"
+                        title="Toggle Suara Ketikan"
+                    >
+                        🔊 <span id="sound-status">ON</span>
+                    </button>
+                </div>
+                <p>Uji kecepatan dan akurasi mengetikmu secara real-time!</p>
+
+                <!-- Badge High Score dari LocalStorage -->
+                <div class="high-score-badge">
+                    🏆 Rekor Terbaik: <span id="high-score-value">0</span> WPM
+                </div>
             </header>
+
+            <!-- Toolbar Pengaturan Durasi Waktu -->
+            <div class="time-selector">
+                <span class="selector-label">Durasi Waktu:</span>
+                <button class="time-btn" data-time="15">15s</button>
+                <button class="time-btn" data-time="30">30s</button>
+                <button class="time-btn active" data-time="60">60s</button>
+            </div>
 
             <!-- Scoreboard / Papan Statistik Realtime -->
             <div class="stats-card">
@@ -48,7 +71,6 @@
 
             <!-- Area Teks Uji Coba -->
             <div class="typing-box" id="typing-box">
-                <!-- Input tersembunyi yang menangkap semua ketikan keyboard -->
                 <input
                     type="text"
                     class="input-field"
@@ -58,8 +80,6 @@
                     autocapitalize="off"
                     spellcheck="false"
                 />
-
-                <!-- Teks yang harus diketik pengguna akan di-render di sini oleh JavaScript -->
                 <p id="text-display" class="text-display"></p>
             </div>
 
@@ -71,7 +91,46 @@
             </div>
         </div>
 
-        <!-- Menghubungkan file JavaScript -->
+        <!-- MODAL / POPUP HASIL AKHIR (GAME OVER) -->
+        <div class="modal-overlay" id="result-modal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <span class="modal-badge" id="rank-badge"
+                        >🏆 Hasil Tes</span
+                    >
+                    <h2 id="modal-rank-title">⚡ Dewa Ketik!</h2>
+                </div>
+
+                <div class="modal-stats">
+                    <div class="modal-stat-box highlight">
+                        <span class="stat-num" id="modal-wpm">0</span>
+                        <span class="stat-desc">WPM (Kata/Menit)</span>
+                    </div>
+                    <div class="modal-stat-box">
+                        <span class="stat-num" id="modal-accuracy">100%</span>
+                        <span class="stat-desc">Akurasi</span>
+                    </div>
+                    <div class="modal-stat-box">
+                        <span class="stat-num" id="modal-cpm">0</span>
+                        <span class="stat-desc">CPM (Karakter/Menit)</span>
+                    </div>
+                    <div class="modal-stat-box">
+                        <span class="stat-num" id="modal-mistakes">0</span>
+                        <span class="stat-desc">Salah Ketik</span>
+                    </div>
+                </div>
+
+                <p id="modal-message" class="modal-message">
+                    Kemampuan mengetikmu sangat luar biasa!
+                </p>
+
+                <button id="modal-restart-btn" class="btn-modal-restart">
+                    🚀 Coba Lagi Sekarang
+                </button>
+            </div>
+        </div>
+
+        <!-- File JavaScript -->
         <script src="script.js"></script>
     </body>
 </html>
