@@ -36,17 +36,17 @@ const floatingContainer = document.getElementById(
     "floating-feedback-container",
 );
 
-// Toolbar Elemen
+// Toolbar
 const langBtns = document.querySelectorAll(".lang-btn");
 const timeBtns = document.querySelectorAll(".time-btn");
 
-// Dual Streak Elemen
+// Dual Streak & Multiplier
 const letterStreakVal = document.getElementById("letter-streak-val");
 const wordStreakVal = document.getElementById("word-streak-val");
 const comboMultiplierTag = document.getElementById("combo-multiplier");
 const comboBar = document.getElementById("combo-bar");
 
-// Audio Settings Modal & Controls
+// Audio Settings
 const audioSettingsBtn = document.getElementById("audio-settings-btn");
 const audioModal = document.getElementById("audio-modal");
 const closeAudioBtn = document.getElementById("close-audio-btn");
@@ -56,7 +56,7 @@ const volumeValTag = document.getElementById("volume-val");
 const currentSoundLabel = document.getElementById("current-sound-label");
 const switchTypeBtns = document.querySelectorAll(".switch-type-btn");
 
-// Result Modal Elemen
+// Result Modal
 const resultModal = document.getElementById("result-modal");
 const modalWpm = document.getElementById("modal-wpm");
 const modalAccuracy = document.getElementById("modal-accuracy");
@@ -70,7 +70,7 @@ const modalRestartBtn = document.getElementById("modal-restart-btn");
 const weakKeysList = document.getElementById("weak-keys-list");
 
 // ==========================================================
-// 3. STATE PERMAINAN
+// 3. STATE PERMAINAN & MULTIPLIER TIER
 // ==========================================================
 let currentLang = "id";
 let maxTime = 60;
@@ -80,25 +80,29 @@ let charIndex = 0;
 let mistakes = 0;
 let isTyping = false;
 
-// Pelacak Streak Huruf & Kata
+// Pelacak Streak & Multiplier
 let letterStreak = 0;
 let maxLetterStreak = 0;
 let wordStreak = 0;
 let maxWordStreak = 0;
-let currentWordHadMistake = false; // Penanda apakah kata yang sedang diketik ada salah
-let currentWordStartIndex = 0; // Indeks awal kata saat ini
+let multiplierLevel = 1; // 1x, 2x, 3x, 4x, 5x (MAX)
+let streakScoreInTier = 0; // Skor pengisi progress bar di tier aktif
+const TIER_THRESHOLD = 15; // Butuh 15 skor streak per level untuk naik tier
+
+let currentWordHadMistake = false;
+let currentWordStartIndex = 0;
 
 // Analyzer Huruf Salah
 let errorKeyMap = {};
 
-// Audio Studio State
+// Audio Studio
 let isSoundEnabled = true;
 let audioVolume = 0.8;
 let currentSwitch = "blue";
 let audioCtx = null;
 
 // ==========================================================
-// 4. WEB AUDIO SYNTHESIZER (KEY CLICK & WORD CHIME)
+// 4. WEB AUDIO SYNTHESIZER
 // ==========================================================
 function initAudio() {
     if (!audioCtx) {
@@ -106,7 +110,7 @@ function initAudio() {
     }
 }
 
-// 1. Suara Ketikan Per Huruf
+// Suara Ketikan Per Huruf
 function playKeySound(isError = false) {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
@@ -119,7 +123,7 @@ function playKeySound(isError = false) {
     if (isError) {
         const osc = audioCtx.createOscillator();
         osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.setValueAtTime(120, now);
         gain.gain.setValueAtTime(audioVolume * 0.25, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
         osc.connect(gain);
@@ -178,27 +182,25 @@ function playKeySound(isError = false) {
     }
 }
 
-// 2. Harmoni Chime Saat 1 Kata Selesai Sempurna
+// Suara Harmoni Kata Sempurna
 function playWordChime() {
     if (!isSoundEnabled || audioVolume <= 0) return;
     initAudio();
     if (audioCtx.state === "suspended") audioCtx.resume();
 
     const now = audioCtx.currentTime;
-    const frequencies = [523.25, 659.25, 783.99]; // Nada C5 - E5 - G5 (Major Crystal Chord)
+    const frequencies = [523.25, 659.25, 783.99, 1046.5]; // Chord C Major E5 - G5 - C6
 
     frequencies.forEach((freq, index) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, now + index * 0.04);
-
         gain.gain.setValueAtTime(audioVolume * 0.18, now + index * 0.04);
         gain.gain.exponentialRampToValueAtTime(
             0.001,
             now + index * 0.04 + 0.25,
         );
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now + index * 0.04);
@@ -206,13 +208,62 @@ function playWordChime() {
     });
 }
 
-function triggerScreenShake() {
-    appContainer.classList.add("shake-screen");
-    setTimeout(() => appContainer.classList.remove("shake-screen"), 250);
+// Suara Ledakan Bass saat Streak Tinggi Hancur
+function playCrashSound(level) {
+    if (!isSoundEnabled || audioVolume <= 0) return;
+    initAudio();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(100 - level * 10, now);
+    osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+
+    gain.gain.setValueAtTime(audioVolume * (0.2 + level * 0.08), now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.35);
 }
 
 // ==========================================================
-// 5. HIGH SCORE & LOCAL STORAGE
+// 5. GUNCANGAN LAYAR BERTINGKAT (DYNAMIC SHAKE)
+// ==========================================================
+function triggerDynamicShake(level) {
+    // Hapus kelas shake sebelumnya
+    appContainer.classList.remove(
+        "shake-sm",
+        "shake-md",
+        "shake-lg",
+        "shake-extreme",
+    );
+    playCrashSound(level);
+
+    let shakeClass = "shake-sm";
+    let duration = 200;
+
+    if (level >= 5) {
+        shakeClass = "shake-extreme"; // Berguncang hebat gempa!
+        duration = 500;
+    } else if (level >= 4) {
+        shakeClass = "shake-lg";
+        duration = 350;
+    } else if (level >= 3) {
+        shakeClass = "shake-md";
+        duration = 250;
+    }
+
+    appContainer.classList.add(shakeClass);
+    setTimeout(() => appContainer.classList.remove(shakeClass), duration);
+}
+
+// ==========================================================
+// 6. HIGH SCORE
 // ==========================================================
 function loadHighScore() {
     const saved =
@@ -235,9 +286,8 @@ function checkAndSaveHighScore(currentWpm) {
 }
 
 // ==========================================================
-// 6. MEMUAT PARAGRAF
+// 7. MEMUAT PARAGRAF
 // ==========================================================
-
 function loadParagraph() {
     const textList = paragraphs[currentLang];
     const randomIndex = Math.floor(Math.random() * textList.length);
@@ -247,8 +297,8 @@ function loadParagraph() {
     selectedText.split("").forEach((char) => {
         const span = document.createElement("span");
         span.className = "char";
-        span.textContent = char; // 🌟 Gunakan textContent (tidak memangkas spasi)
-        span.setAttribute("data-char", char); // 🌟 Simpan karakter asli di atribut
+        span.textContent = char;
+        span.setAttribute("data-char", char);
         textDisplay.appendChild(span);
     });
 
@@ -259,7 +309,7 @@ function loadParagraph() {
 }
 
 // ==========================================================
-// 7. TIMER & UPDATE METRIK
+// 8. TIMER & METRIK
 // ==========================================================
 function initTimer() {
     if (timeLeft > 0) {
@@ -306,38 +356,77 @@ function removeActiveCursor() {
 }
 
 // ==========================================================
-// 8. LOGIKA DUAL STREAK & FLOATING FEEDBACK
+// 9. LOGIKA TIER MULTIPLIER & VISUAL STREAK
 // ==========================================================
+function addStreakPoints(points = 1) {
+    streakScoreInTier += points;
+
+    // Jika progress bar di tier aktif penuh -> Naik ke Multiplier berikutnya
+    if (streakScoreInTier >= TIER_THRESHOLD) {
+        if (multiplierLevel < 5) {
+            multiplierLevel++;
+            streakScoreInTier = 0; // Reset bar untuk mengisi tier selanjutnya
+        } else {
+            streakScoreInTier = TIER_THRESHOLD; // Max tier 5x
+        }
+    }
+
+    updateStreakUI();
+}
+
+function resetMultiplier() {
+    multiplierLevel = 1;
+    streakScoreInTier = 0;
+    appContainer.classList.remove("overdrive-mode");
+    updateStreakUI();
+}
+
 function updateStreakUI() {
     letterStreakVal.innerText = letterStreak;
     wordStreakVal.innerText = wordStreak;
 
-    // Hitung Multiplier
-    let multiplier = "1x MULTIPLIER";
-    if (wordStreak >= 10 || letterStreak >= 60) multiplier = "5x ULTRA 🔥";
-    else if (wordStreak >= 5 || letterStreak >= 30) multiplier = "3x MEGA ⚡";
-    else if (wordStreak >= 2 || letterStreak >= 15) multiplier = "2x COMBO ✨";
-    comboMultiplierTag.innerText = multiplier;
+    // Update Multiplier Label & Class
+    comboMultiplierTag.className = `multiplier-pill tier-${multiplierLevel}`;
+    if (multiplierLevel >= 5) {
+        comboMultiplierTag.innerText = "5x OVERDRIVE 🔥";
+        appContainer.classList.add("overdrive-mode");
+    } else {
+        comboMultiplierTag.innerText = `${multiplierLevel}x MULTIPLIER`;
+        appContainer.classList.remove("overdrive-mode");
+    }
 
-    // Progress bar berdasarkan letter streak
-    const progressPercent = Math.min(100, (letterStreak / 60) * 100);
-    comboBar.style.width = `${progressPercent}%`;
+    // Progress bar percentage di dalam tier aktif
+    const percent = Math.min(100, (streakScoreInTier / TIER_THRESHOLD) * 100);
+    comboBar.style.width = multiplierLevel >= 5 ? "100%" : `${percent}%`;
 }
 
-// Menampilkan Animasi Pop-up Melayang saat Kata Sempurna
-function showFloatingFeedback(message) {
-    const badge = document.createElement("div");
-    badge.className = "floating-badge";
-    badge.innerText = message;
-    floatingContainer.appendChild(badge);
+// 1. Partikel Angka Melayang (+1) Tepat di Atas Huruf
+function spawnCharSparkle(targetElement) {
+    if (!targetElement) return;
+    const rect = targetElement.getBoundingClientRect();
+    const boxRect = typingBox.getBoundingClientRect();
 
-    // Hapus elemen setelah animasi selesai (1.2 detik)
-    setTimeout(() => {
-        badge.remove();
-    }, 1200);
+    const sparkle = document.createElement("span");
+    sparkle.className = "char-sparkle";
+    sparkle.innerText = `+${multiplierLevel}`;
+
+    // Posisikan tepat di atas karakter yang diketik
+    sparkle.style.left = `${rect.left - boxRect.left}px`;
+    sparkle.style.top = `${rect.top - boxRect.top - 14}px`;
+
+    floatingContainer.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 600);
 }
 
-// Efek Kilau Emas pada Kata yang Selesai
+// 2. Banner Pop-Up Per Kata
+function showWordBanner(message) {
+    const banner = document.createElement("div");
+    banner.className = "floating-word-banner";
+    banner.innerText = message;
+    floatingContainer.appendChild(banner);
+    setTimeout(() => banner.remove(), 1100);
+}
+
 function highlightCompletedWord(startIndex, endIndex) {
     const characters = textDisplay.querySelectorAll(".char");
     for (let i = startIndex; i <= endIndex; i++) {
@@ -345,14 +434,14 @@ function highlightCompletedWord(startIndex, endIndex) {
             characters[i].classList.add("word-perfect");
             setTimeout(
                 () => characters[i]?.classList.remove("word-perfect"),
-                600,
+                500,
             );
         }
     }
 }
 
 // ==========================================================
-// 9. LOGIKA UTAMA MENGETIK
+// 10. LOGIKA KETIKAN UTAMA
 // ==========================================================
 function handleTyping() {
     const characters = textDisplay.querySelectorAll(".char");
@@ -364,7 +453,7 @@ function handleTyping() {
         isTyping = true;
     }
 
-    // Tombol Backspace Ditekan
+    // Backspace
     if (typedValue.length < charIndex) {
         if (charIndex > 0) {
             charIndex--;
@@ -374,13 +463,12 @@ function handleTyping() {
             characters[charIndex].classList.remove("correct", "incorrect");
             playKeySound(false);
 
-            // Backspace mereset streak huruf & menandai kata saat ini ada salah
             letterStreak = 0;
             currentWordHadMistake = true;
-            updateStreakUI();
+            resetMultiplier();
         }
     }
-    // Karakter Baru Diketik
+    // Karakter Baru
     else if (charIndex < characters.length && timeLeft > 0) {
         const expectedChar = characters[charIndex].getAttribute("data-char");
 
@@ -389,11 +477,15 @@ function handleTyping() {
             characters[charIndex].classList.remove("incorrect");
             playKeySound(false);
 
-            // 1. TAMBAH STREAK HURUF
+            // Partikel +1 per huruf
+            spawnCharSparkle(characters[charIndex]);
+
+            // Tambah Streak Huruf & Poin Tier
             letterStreak++;
             if (letterStreak > maxLetterStreak) maxLetterStreak = letterStreak;
+            addStreakPoints(1);
 
-            // 2. CEK APAKAH INI AKHIR DARI SUATU KATA (Spasi atau Huruf Terakhir Paragraf)
+            // Cek Selesai Kata
             const isSpace = expectedChar === " ";
             const isLastChar = charIndex === characters.length - 1;
 
@@ -401,58 +493,49 @@ function handleTyping() {
                 const wordEndIndex = isLastChar ? charIndex : charIndex - 1;
 
                 if (!currentWordHadMistake) {
-                    // Kata selesai 100% sempurna!
                     wordStreak++;
                     if (wordStreak > maxWordStreak) maxWordStreak = wordStreak;
 
                     playWordChime();
                     highlightCompletedWord(currentWordStartIndex, wordEndIndex);
+                    addStreakPoints(3); // Bonus 3 poin untuk kata sempurna!
 
-                    // Tentukan Pesan Pop-up
-                    if (wordStreak >= 10)
-                        showFloatingFeedback(`💎 GODLIKE! ${wordStreak} WORDS`);
-                    else if (wordStreak >= 5)
-                        showFloatingFeedback(
-                            `🔥 UNSTOPPABLE! ${wordStreak} WORDS`,
-                        );
-                    else if (wordStreak >= 3)
-                        showFloatingFeedback(`⚡ GREAT! +1 WORD`);
-                    else showFloatingFeedback(`✨ PERFECT! +1 WORD`);
+                    // Pesan Banner Keren
+                    if (multiplierLevel >= 5)
+                        showWordBanner(`💎 OVERDRIVE! (${wordStreak} Words)`);
+                    else if (multiplierLevel >= 4)
+                        showWordBanner(`🔥 UNSTOPPABLE! (${wordStreak} Words)`);
+                    else if (multiplierLevel >= 3)
+                        showWordBanner(`⚡ SICK COMBO! (${wordStreak} Words)`);
+                    else showWordBanner(`✨ PERFECT WORD!`);
                 } else {
-                    // Kata ini pernah ada salah ketik
                     wordStreak = 0;
                 }
 
-                // Reset untuk kata berikutnya
                 currentWordHadMistake = false;
                 currentWordStartIndex = charIndex + 1;
             }
-
-            updateStreakUI();
         } else {
             mistakes++;
             characters[charIndex].classList.add("incorrect");
             characters[charIndex].classList.remove("correct");
             playKeySound(true);
 
-            // Catat huruf salah
             const targetChar = expectedChar.toLowerCase();
             errorKeyMap[targetChar] = (errorKeyMap[targetChar] || 0) + 1;
 
-            // Tandai kata saat ini salah & reset streak
+            // 🌋 Guncangkan Layar Sesuai Multiplier Level yang Hancur!
+            triggerDynamicShake(multiplierLevel);
+
             currentWordHadMistake = true;
-            if (letterStreak >= 15 || wordStreak >= 3) {
-                triggerScreenShake();
-            }
             letterStreak = 0;
             wordStreak = 0;
-            updateStreakUI();
+            resetMultiplier();
         }
 
         charIndex++;
     }
 
-    // Pindahkan Kursor
     removeActiveCursor();
     if (charIndex < characters.length && timeLeft > 0) {
         characters[charIndex].classList.add("active");
@@ -464,7 +547,7 @@ function handleTyping() {
 }
 
 // ==========================================================
-// 10. GAME OVER & WEAK KEY ANALYZER
+// 11. GAME OVER
 // ==========================================================
 function finishGame() {
     clearInterval(timer);
@@ -503,7 +586,6 @@ function finishGame() {
         rankMessage += " 🎉 REKOR TERBARU BERHASIL DIPECAHKAN!";
     }
 
-    // Isi data modal
     modalWpm.innerText = finalStats.wpm;
     modalAccuracy.innerText = `${finalStats.accuracy}%`;
     modalCpm.innerText = finalStats.cpm;
@@ -513,7 +595,6 @@ function finishGame() {
     modalRankTitle.innerText = rankTitle;
     modalMessage.innerText = rankMessage;
 
-    // Weak Key List
     const sortedErrors = Object.entries(errorKeyMap).sort(
         (a, b) => b[1] - a[1],
     );
@@ -535,7 +616,7 @@ function finishGame() {
 }
 
 // ==========================================================
-// 11. RESET GAME
+// 12. RESET GAME
 // ==========================================================
 function resetGame() {
     clearInterval(timer);
@@ -550,10 +631,13 @@ function resetGame() {
     maxLetterStreak = 0;
     wordStreak = 0;
     maxWordStreak = 0;
+    multiplierLevel = 1;
+    streakScoreInTier = 0;
     currentWordHadMistake = false;
     currentWordStartIndex = 0;
     errorKeyMap = {};
 
+    appContainer.classList.remove("overdrive-mode");
     inputField.disabled = false;
     inputField.value = "";
     floatingContainer.innerHTML = "";
@@ -570,7 +654,7 @@ function resetGame() {
 }
 
 // ==========================================================
-// 12. EVENT LISTENERS
+// 13. EVENT LISTENERS & AUDIO CONTROLS
 // ==========================================================
 inputField.addEventListener("input", handleTyping);
 typingBox.addEventListener("click", () => inputField.focus());
@@ -639,8 +723,6 @@ function updateAudioLabel() {
     }
 }
 
-// ==========================================================
-// 13. INIT
-// ==========================================================
+// Inisialisasi Pertama Kali
 loadHighScore();
 loadParagraph();
