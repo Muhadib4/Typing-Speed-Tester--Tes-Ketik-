@@ -20,11 +20,13 @@
             <header class="header">
                 <div class="header-top">
                     <div class="brand">
-                        <h1>⚡ TypeSprint <span>COMBO FX</span></h1>
+                        <h1>
+                            ⚡ TypeSprint <span id="brand-tag">COMBO FX</span>
+                        </h1>
                     </div>
 
                     <div class="top-actions">
-                        <!-- Tombol Buka Pengaturan Suara -->
+                        <!-- Tombol Audio Studio -->
                         <button
                             id="audio-settings-btn"
                             class="pill-btn"
@@ -38,7 +40,8 @@
 
                         <!-- Rekor Tertinggi -->
                         <div class="high-score-badge">
-                            🏆 <span id="high-score-value">0</span> WPM
+                            🏆 <span id="high-score-title">Rekor:</span>
+                            <span id="high-score-value">0</span> WPM
                         </div>
                     </div>
                 </div>
@@ -47,7 +50,9 @@
                 <div class="toolbar">
                     <!-- Pilihan Bahasa -->
                     <div class="segmented-control">
-                        <span class="toolbar-label">Bahasa:</span>
+                        <span class="toolbar-label" id="lbl-language"
+                            >Bahasa:</span
+                        >
                         <button class="lang-btn active" data-lang="id">
                             🇮🇩 Indo
                         </button>
@@ -56,25 +61,34 @@
                         </button>
                     </div>
 
-                    <!-- Pilihan Durasi -->
+                    <!-- Pilihan Durasi (Termasuk Mode Zen Tanpa Waktu: 0 / ∞) -->
                     <div class="segmented-control">
-                        <span class="toolbar-label">Waktu:</span>
+                        <span class="toolbar-label" id="lbl-time">Waktu:</span>
                         <button class="time-btn" data-time="15">15s</button>
                         <button class="time-btn" data-time="30">30s</button>
                         <button class="time-btn active" data-time="60">
                             60s
                         </button>
+                        <button
+                            class="time-btn"
+                            data-time="0"
+                            title="Mode Santai Tanpa Batas Waktu"
+                        >
+                            ∞ Zen
+                        </button>
                     </div>
                 </div>
             </header>
 
-            <!-- INOVASI: DUAL STREAK PANEL (STREAK HURUF & STREAK KATA) -->
+            <!-- DUAL STREAK PANEL -->
             <div class="combo-panel">
                 <!-- Letter Streak -->
                 <div class="streak-badge letter-streak">
                     <span class="streak-icon">🔤</span>
                     <div class="streak-text-group">
-                        <span class="streak-title">Letter Streak</span>
+                        <span class="streak-title" id="lbl-letter-streak"
+                            >Streak Huruf</span
+                        >
                         <span class="streak-num" id="letter-streak-val">0</span>
                     </div>
                 </div>
@@ -83,7 +97,9 @@
                 <div class="streak-badge word-streak">
                     <span class="streak-icon">📖</span>
                     <div class="streak-text-group">
-                        <span class="streak-title">Word Streak</span>
+                        <span class="streak-title" id="lbl-word-streak"
+                            >Streak Kata</span
+                        >
                         <span class="streak-num" id="word-streak-val">0</span>
                     </div>
                 </div>
@@ -102,7 +118,9 @@
             <!-- STATS CARD -->
             <div class="stats-card">
                 <div class="stat-item">
-                    <span class="stat-label">Sisa Waktu</span>
+                    <span class="stat-label" id="lbl-time-stat"
+                        >Sisa Waktu</span
+                    >
                     <span class="stat-value" id="time-left">60s</span>
                 </div>
                 <div class="stat-item">
@@ -114,23 +132,25 @@
                     <span class="stat-value" id="cpm-value">0</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Akurasi</span>
+                    <span class="stat-label" id="lbl-accuracy-stat"
+                        >Akurasi</span
+                    >
                     <span class="stat-value" id="accuracy-value">100%</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Salah Ketik</span>
+                    <span class="stat-label" id="lbl-mistakes-stat"
+                        >Salah Ketik</span
+                    >
                     <span class="stat-value" id="mistakes-value">0</span>
                 </div>
             </div>
 
-            <!-- TYPING BOX DENGAN FLOATING POPUP AREA -->
+            <!-- TYPING BOX -->
             <div class="typing-box" id="typing-box">
-                <!-- Wadah untuk animasi melayang kata sempurna -->
                 <div
                     id="floating-feedback-container"
                     class="floating-container"
                 ></div>
-
                 <input
                     type="text"
                     class="input-field"
@@ -146,26 +166,24 @@
             <!-- CONTROLS -->
             <div class="controls">
                 <button id="restart-btn" class="btn-restart">
-                    🔄 Reset / Ganti Teks
+                    🔄 <span id="lbl-restart-btn">Reset / Ganti Teks</span>
                 </button>
             </div>
         </div>
 
-        <!-- =========================================================
-       MODAL PENGATURAN SUARA (AUDIO STUDIO)
-       ========================================================= -->
+        <!-- MODAL AUDIO STUDIO -->
         <div class="modal-overlay" id="audio-modal">
             <div class="modal-card audio-settings-card">
                 <div class="modal-header">
-                    <h3>🎛️ Audio & Switch Studio</h3>
-                    <p class="modal-subtitle">
+                    <h3 id="audio-modal-title">🎛️ Audio & Switch Studio</h3>
+                    <p class="modal-subtitle" id="audio-modal-subtitle">
                         Atur profil suara ketikan dan volume
                     </p>
                 </div>
 
                 <div class="audio-options">
                     <div class="setting-row">
-                        <label for="sound-toggle"
+                        <label for="sound-toggle" id="lbl-sound-toggle"
                             >Suara Keyboard & Chime:</label
                         >
                         <input type="checkbox" id="sound-toggle" checked />
@@ -173,7 +191,8 @@
 
                     <div class="setting-row">
                         <label for="volume-slider"
-                            >Volume: <span id="volume-val">80%</span></label
+                            ><span id="lbl-volume">Volume:</span>
+                            <span id="volume-val">80%</span></label
                         >
                         <input
                             type="range"
@@ -185,7 +204,9 @@
                     </div>
 
                     <div class="setting-group">
-                        <label>Tipe Switch / Efek Suara:</label>
+                        <label id="lbl-switch-type"
+                            >Tipe Switch / Efek Suara:</label
+                        >
                         <div class="switch-grid">
                             <button
                                 class="switch-type-btn active"
@@ -210,14 +231,12 @@
                 </div>
 
                 <button id="close-audio-btn" class="btn-primary">
-                    Simpan & Tutup
+                    <span id="lbl-save-audio-btn">Simpan & Tutup</span>
                 </button>
             </div>
         </div>
 
-        <!-- =========================================================
-       MODAL HASIL AKHIR
-       ========================================================= -->
+        <!-- MODAL HASIL AKHIR -->
         <div class="modal-overlay" id="result-modal">
             <div class="modal-card">
                 <div class="modal-header">
@@ -230,33 +249,45 @@
                 <div class="modal-stats">
                     <div class="modal-stat-box highlight">
                         <span class="stat-num" id="modal-wpm">0</span>
-                        <span class="stat-desc">WPM (Kata/Menit)</span>
+                        <span class="stat-desc" id="lbl-modal-wpm"
+                            >WPM (Kata/Menit)</span
+                        >
                     </div>
                     <div class="modal-stat-box">
                         <span class="stat-num" id="modal-accuracy">100%</span>
-                        <span class="stat-desc">Akurasi</span>
+                        <span class="stat-desc" id="lbl-modal-accuracy"
+                            >Akurasi</span
+                        >
                     </div>
                     <div class="modal-stat-box">
                         <span class="stat-num" id="modal-cpm">0</span>
-                        <span class="stat-desc">CPM (Karakter/Menit)</span>
+                        <span class="stat-desc" id="lbl-modal-cpm"
+                            >CPM (Karakter/Menit)</span
+                        >
                     </div>
                     <div class="modal-stat-box">
                         <span class="stat-num" id="modal-letter-streak">0</span>
-                        <span class="stat-desc">Max Letter Streak 🔤</span>
+                        <span class="stat-desc" id="lbl-modal-letter-streak"
+                            >Max Letter Streak 🔤</span
+                        >
                     </div>
                     <div class="modal-stat-box">
                         <span class="stat-num" id="modal-word-streak">0</span>
-                        <span class="stat-desc">Max Word Streak 📖</span>
+                        <span class="stat-desc" id="lbl-modal-word-streak"
+                            >Max Word Streak 📖</span
+                        >
                     </div>
                     <div class="modal-stat-box">
                         <span class="stat-num" id="modal-mistakes">0</span>
-                        <span class="stat-desc">Salah Ketik</span>
+                        <span class="stat-desc" id="lbl-modal-mistakes"
+                            >Salah Ketik</span
+                        >
                     </div>
                 </div>
 
                 <!-- WEAK KEY ANALYZER -->
                 <div class="weak-keys-box" id="weak-keys-box">
-                    <span class="weak-keys-title"
+                    <span class="weak-keys-title" id="lbl-weak-keys-title"
                         >🎯 Analisis Huruf Terlemah:</span
                     >
                     <div class="weak-keys-list" id="weak-keys-list">
@@ -267,7 +298,7 @@
                 <p id="modal-message" class="modal-message"></p>
 
                 <button id="modal-restart-btn" class="btn-primary">
-                    🚀 Main Lagi
+                    <span id="lbl-modal-restart-btn">🚀 Main Lagi</span>
                 </button>
             </div>
         </div>
