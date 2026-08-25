@@ -2,23 +2,19 @@
 1. RESET CSS & VARIABEL WARNA
 ========================================================== */
 :root {
-    --bg-color: #0f172a; /* Latar belakang utama (Dark Slate) */
-    --card-bg: #1e293b; /* Latar belakang kartu/wadah */
-    --card-border: #334155; /* Garis tepi kartu */
-    --text-main: #f8fafc; /* Warna teks judul/utama */
-    --text-muted: #64748b; /* Warna teks keterangan/abu-abu */
-    --accent: #38bdf8; /* Warna aksen biru terang */
-    --accent-hover: #0284c7; /* Warna aksen saat tombol di-hover */
-    --char-default: #94a3b8; /* Warna huruf sebelum diketik */
-    --char-correct: #4ade80; /* Warna huruf jika diketik BENAR (Hijau) */
-    --char-incorrect: #f87171; /* Warna huruf jika diketik SALAH (Merah) */
-    --char-error-bg: rgba(
-        248,
-        113,
-        113,
-        0.2
-    ); /* Latar belakang huruf yang salah */
-    --cursor-color: #38bdf8; /* Warna garis kursor yang berkedip */
+    --bg-color: #0f172a; /* Dark Slate */
+    --card-bg: #1e293b; /* Slate 800 */
+    --card-border: #334155; /* Slate 700 */
+    --text-main: #f8fafc; /* Putih Bersih */
+    --text-muted: #94a3b8; /* Abu-abu terang */
+    --accent: #38bdf8; /* Sky Blue */
+    --accent-hover: #0284c7;
+    --gold: #fbbf24; /* Warna Emas untuk High Score */
+    --char-default: #64748b; /* Huruf belum diketik */
+    --char-correct: #4ade80; /* Hijau */
+    --char-incorrect: #f87171; /* Merah */
+    --char-error-bg: rgba(248, 113, 113, 0.2);
+    --cursor-color: #38bdf8;
 }
 
 * {
@@ -46,59 +42,149 @@ body {
     max-width: 850px;
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 35px 30px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 22px;
 }
 
 /* ==========================================================
-3. HEADER (Judul & Subjudul)
+3. HEADER, HIGH SCORE, & SOUND TOGGLE
 ========================================================== */
 .header {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
-.header h1 {
-    font-size: 2rem;
+.header-top {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-top h1 {
+    font-size: 1.8rem;
     font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 6px;
     letter-spacing: -0.5px;
 }
 
+/* Tombol Suara */
+.icon-btn {
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: "JetBrains Mono", monospace;
+    transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+    border-color: var(--accent);
+    background-color: rgba(56, 189, 248, 0.1);
+}
+
 .header p {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
 }
 
+/* Badge Rekor Tertinggi */
+.high-score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: var(--gold);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.high-score-badge span {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+}
+
 /* ==========================================================
-4. SCOREBOARD / KARTU STATISTIK
+4. TIME SELECTOR (PILIHAN WAKTU)
+========================================================== */
+.time-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: rgba(15, 23, 42, 0.4);
+    padding: 8px 16px;
+    border-radius: 12px;
+    align-self: center;
+}
+
+.selector-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.time-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.time-btn:hover {
+    color: var(--text-main);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.time-btn.active {
+    background-color: var(--accent);
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* ==========================================================
+5. SCOREBOARD / KARTU STATISTIK
 ========================================================== */
 .stats-card {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
     background-color: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 15px;
+    border-radius: 14px;
+    padding: 14px;
 }
 
 .stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 10px;
+    padding: 8px;
     border-radius: 8px;
     background-color: rgba(30, 41, 59, 0.5);
 }
 
 .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -107,35 +193,33 @@ body {
 }
 
 .stat-value {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
     font-weight: 700;
     font-family: "JetBrains Mono", monospace;
     color: var(--accent);
 }
 
 /* ==========================================================
-5. AREA KETIK (TYPING BOX) & EFEK KARAKTER
+6. AREA KETIK (TYPING BOX)
 ========================================================== */
 .typing-box {
     position: relative;
-    background-color: rgba(15, 23, 42, 0.8);
+    background-color: rgba(15, 23, 42, 0.85);
     border: 2px solid var(--card-border);
-    border-radius: 12px;
-    padding: 25px;
+    border-radius: 14px;
+    padding: 26px;
     cursor: text;
     min-height: 160px;
     display: flex;
     align-items: center;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
-/* Efek saat area ketik sedang fokus / aktif */
 .typing-box:focus-within {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
 }
 
-/* Input tersembunyi (tetap menerima input keyboard) */
 .input-field {
     position: absolute;
     top: 0;
@@ -147,45 +231,39 @@ body {
     cursor: text;
 }
 
-/* Teks bacaan */
 .text-display {
     font-family: "JetBrains Mono", monospace;
     font-size: 1.25rem;
-    line-height: 1.8;
+    line-height: 1.85;
     letter-spacing: 0.5px;
     user-select: none;
     word-break: break-word;
 }
 
-/* Status tiap karakter huruf */
 .char {
     position: relative;
     color: var(--char-default);
     transition:
-        color 0.1s ease,
-        background-color 0.1s ease;
+        color 0.08s ease,
+        background-color 0.08s ease;
 }
 
-/* Huruf yang berhasil diketik dengan BENAR */
 .char.correct {
     color: var(--char-correct);
 }
 
-/* Huruf yang SALAH ketik */
 .char.incorrect {
     color: var(--char-incorrect);
     background-color: var(--char-error-bg);
     border-radius: 3px;
 }
 
-/* Kursor aktif pada huruf yang sedang dituju */
 .char.active {
     color: var(--accent);
     border-left: 2px solid var(--cursor-color);
     animation: blink 1s infinite;
 }
 
-/* Animasi kedipan kursor */
 @keyframes blink {
     0%,
     100% {
@@ -197,7 +275,7 @@ body {
 }
 
 /* ==========================================================
-6. KONTROL & TOMBOL RESTART
+7. TOMBOL RESTART
 ========================================================== */
 .controls {
     display: flex;
@@ -211,7 +289,7 @@ body {
     font-family: "Inter", sans-serif;
     font-size: 0.95rem;
     font-weight: 600;
-    padding: 12px 24px;
+    padding: 12px 26px;
     border-radius: 10px;
     cursor: pointer;
     display: inline-flex;
@@ -223,23 +301,152 @@ body {
 .btn-restart:hover {
     background-color: #7dd3fc;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.3);
-}
-
-.btn-restart:active {
-    transform: translateY(0);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
 }
 
 /* ==========================================================
-7. RESPONSIVE DESIGN (Tampilan Mobile)
+8. MODAL POPUP HASIL AKHIR (GAME OVER)
+========================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px); /* Efek blur latar belakang */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Saat modal ditampilkan oleh JavaScript */
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 480px;
+    padding: 35px 30px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-overlay.show .modal-card {
+    transform: scale(1);
+}
+
+.modal-badge {
+    display: inline-block;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.modal-header h2 {
+    font-size: 1.8rem;
+    color: var(--text-main);
+}
+
+.modal-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.modal-stat-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.modal-stat-box.highlight {
+    grid-column: span 2;
+    background: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.15),
+        rgba(15, 23, 42, 0.8)
+    );
+    border-color: var(--accent);
+}
+
+.modal-stat-box .stat-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.modal-stat-box.highlight .stat-num {
+    font-size: 2.2rem;
+}
+
+.modal-stat-box .stat-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.modal-message {
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+}
+
+.btn-modal-restart {
+    background-color: var(--accent);
+    color: #0f172a;
+    border: none;
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 14px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-modal-restart:hover {
+    background-color: #7dd3fc;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+}
+
+/* ==========================================================
+9. RESPONSIVE DESIGN (Mobile)
 ========================================================== */
 @media (max-width: 640px) {
     .container {
         padding: 20px 16px;
     }
 
-    .header h1 {
-        font-size: 1.6rem;
+    .header-top h1 {
+        font-size: 1.4rem;
     }
 
     .stats-card {
@@ -248,10 +455,5 @@ body {
 
     .text-display {
         font-size: 1.05rem;
-        line-height: 1.6;
-    }
-
-    .typing-box {
-        padding: 16px;
     }
 }
