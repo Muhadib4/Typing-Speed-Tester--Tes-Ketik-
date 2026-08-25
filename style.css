@@ -128,15 +128,15 @@ body.mode-celestial {
 body.backrooms-lvl-1 {
     background-image:
         linear-gradient(rgba(43, 38, 7, 0.6), rgba(43, 38, 7, 0.6)),
-        url("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80");
+        url("img/backroom\ lvl\ 1.jpg");
     animation: backroomsFlicker 4s infinite;
     filter: sepia(0.5) saturate(0.8);
 }
 /* -2x: Yellow Hallway Redup */
 body.backrooms-lvl-2 {
     background-image:
-        linear-gradient(rgba(43, 38, 7, 0.7), rgba(43, 38, 7, 0.7)),
-        url("https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=1920&q=80");
+        linear-gradient(rgba(20, 18, 3, 0.7), rgba(34, 29, 1, 0.7)),
+        url("img/backroom\ lvl\ 2.jpg");
     animation: backroomsFlicker 3.5s infinite;
     filter: sepia(0.6) saturate(0.7) brightness(0.85);
 }
@@ -144,23 +144,24 @@ body.backrooms-lvl-2 {
 body.backrooms-lvl-3 {
     background-image:
         linear-gradient(rgba(20, 15, 0, 0.72), rgba(20, 15, 0, 0.72)),
-        url("https://images.unsplash.com/photo-1510906594845-bc082582c8cc?w=1920&q=80");
+        url("img/backroom\ lvl\ 3.jpg");
     animation: backroomsFlicker 3s infinite;
     filter: sepia(0.7) saturate(0.6) brightness(0.75);
 }
 /* -4x: Dark Flooded Basement */
 body.backrooms-lvl-4 {
-    background-image:
-        linear-gradient(rgba(60, 10, 10, 0.7), rgba(10, 5, 5, 0.7)),
-        url("https://images.unsplash.com/photo-1519074069390-47a413a28d55?w=1920&q=80");
+    background-image:        
+        linear-gradient(rgba(22, 24, 1, 0.8), rgba(10, 5, 5, 0.8)),        
+        url("img/backroom\ lvl\ 4.jpg");
     animation: backroomsFlicker 2.5s infinite;
     filter: saturate(0.4) brightness(0.65) contrast(1.3);
+    -webkit-animation: backroomsFlicker 2.5s infinite;
 }
 /* -5x: Red Blood Tunnel */
 body.backrooms-lvl-5 {
     background-image:
-        linear-gradient(rgba(100, 0, 0, 0.65), rgba(30, 0, 0, 0.65)),
-        url("https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1920&q=80");
+        linear-gradient(rgba(100, 0, 0, 0.3), rgba(30, 0, 0)),
+        url("img/backroom\ lvl\ 5.jpg");
     animation:
         backroomsFlicker 2s infinite,
         nightmareSiren 1.5s infinite alternate;
@@ -168,29 +169,24 @@ body.backrooms-lvl-5 {
 }
 /* -6x: Burned Dark Ruins */
 body.backrooms-lvl-6 {
-    background-image:
-        linear-gradient(rgba(80, 0, 0, 0.75), rgba(0, 0, 0, 0.75)),
-        url("https://images.unsplash.com/photo-1533240332313-0db49b459ad6?w=1920&q=80");
-    animation:
-        backroomsFlicker 1.5s infinite,
-        nightmareSiren 1.2s infinite alternate;
+    background-image:        linear-gradient(rgba(80, 0, 0, 0), rgba(0, 0, 0, 0.25)),        url("img/backroom\ lvl\ 6.jpg");
+    animation:        backroomsFlicker 1.5s infinite,        nightmareSiren 1.2s infinite alternate;
     filter: saturate(0.2) brightness(0.45) contrast(1.7);
+    -webkit-animation:        backroomsFlicker 1.5s infinite,        nightmareSiren 1.2s infinite alternate;
 }
 /* -7x: Black Void Fog */
 body.backrooms-lvl-7 {
-    background-image:
-        linear-gradient(rgba(50, 0, 0, 0.85), rgba(0, 0, 0, 0.85)),
-        url("https://images.unsplash.com/photo-1538370965046-79c0d6907d47?w=1920&q=80");
-    animation:
-        backroomsFlicker 1.2s infinite,
-        nightmareSiren 1s infinite alternate;
+    background-image:                linear-gradient(rgba(50, 0, 0, 0), rgba(0, 0, 0, 0.25)),        url("img/backroom\ lvl\ 7.jpg");
+    animation:        backroomsFlicker 1.2s infinite,        nightmareSiren 1s infinite alternate;
     filter: saturate(0.15) brightness(0.4) contrast(2);
+    -webkit-animation:                backroomsFlicker 1.2s infinite,                nightmareSiren 1s infinite alternate;
+    -webkit-filter: saturate(0.15) brightness(0.4) contrast(2);
 }
 /* -8x: Pitch Black Horror Entity */
 body.backrooms-lvl-8 {
     background-image:
-        linear-gradient(rgba(30, 0, 0, 0.9), rgba(0, 0, 0, 0.9)),
-        url("https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=1920&q=80");
+        linear-gradient(rgba(30, 0, 0, 0), rgba(0, 0, 0, 0.9)),
+        url("img/backroom\ lvl\ 8.jpg");
     animation:
         backroomsFlicker 0.9s infinite,
         nightmareSiren 0.8s infinite alternate;
@@ -199,8 +195,8 @@ body.backrooms-lvl-8 {
 /* -9x: Total Darkness Entity */
 body.backrooms-lvl-9 {
     background-image:
-        linear-gradient(rgba(20, 0, 0, 0.92), rgba(0, 0, 0, 0.92)),
-        url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=80");
+        linear-gradient(rgba(20, 0, 0, 0), rgbrgba(0, 0, 0, 0)
+        url("img/backroom\ lvl\ 9.jpg"));
     animation:
         backroomsFlicker 0.7s infinite,
         nightmareSiren 0.6s infinite alternate;
@@ -214,7 +210,7 @@ body.backrooms-lvl-10 {
             rgba(200, 0, 0, 0.3),
             rgba(0, 0, 0, 0.98)
         ),
-        url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=80");
+        url("img/backroom\ lvl\ 10.jpg");
     animation:
         voidPulse 0.5s infinite alternate,
         backroomsFlicker 0.5s infinite;
