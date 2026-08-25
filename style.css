@@ -54,73 +54,146 @@ body {
     background-attachment: fixed;
 }
 
-/* ── POSITIF: +2x ~ +10x ── */
-/* +2x: Aurora Biru Langit */
-body.streak-pos-2 {
-    background-image:
-        linear-gradient(rgba(8, 12, 20, 0.5), rgba(8, 12, 20, 0.5)),
-        url("https://images.unsplash.com/photo-1464802686167-b939a6910659?w=1920&q=80");
-}
-/* +4x: Nebula Ungu Galaxy */
-body.streak-pos-4 {
-    background-image:
-        linear-gradient(rgba(8, 12, 20, 0.45), rgba(8, 12, 20, 0.45)),
-        url("https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80");
-    animation: bgZoomIn 20s ease infinite alternate;
-}
-/* +6x: Bima Sakti Megah */
-body.streak-pos-6 {
-    background-image:
-        linear-gradient(rgba(8, 12, 20, 0.35), rgba(8, 12, 20, 0.35)),
-        url("https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=1920&q=80");
-    animation: bgZoomIn 15s ease infinite alternate;
-}
-/* +8x: Cosmic Neon Fire */
-body.streak-pos-8 {
-    background-image:
-        linear-gradient(rgba(8, 12, 20, 0.25), rgba(8, 12, 20, 0.25)),
-        url("https://images.unsplash.com/photo-1509773896068-7fd415d91e2e?w=1920&q=80");
-    animation: bgDrift 12s ease infinite alternate;
-}
-/* +10x: CELESTIAL DIVINE RAINBOW */
-body.streak-pos-10,
-body.mode-celestial {
-    background-image:
-        linear-gradient(rgba(8, 12, 20, 0.15), rgba(8, 12, 20, 0.15)),
-        url("https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1920&q=80");
-    animation:
-        bgDrift 8s ease infinite alternate,
-        celestialColorShift 4s ease infinite;
+/* ── POSITIF: BACKGROUND BERUBAH DI SETIAP +1 STREAK ── */
+body[class*="streak-pos-"] {
+    --celestial-opacity: 0.25;
+    background-color: #07101f;
+    background-size: 150% 150%;
+    background-attachment: fixed;
+    animation: positiveAuroraDrift 18s ease-in-out infinite alternate;
 }
 
-@keyframes bgZoomIn {
+/* +1 — Midnight Blue */
+body.streak-pos-1 {
+    --celestial-opacity: 0.2;
+    background-image:
+        radial-gradient(circle at 15% 25%, rgba(14, 165, 233, 0.2), transparent 38%),
+        radial-gradient(circle at 82% 72%, rgba(59, 130, 246, 0.16), transparent 42%),
+        linear-gradient(135deg, #07101f, #0b1930 55%, #091322);
+}
+
+/* +2 — Cyan Horizon */
+body.streak-pos-2 {
+    --celestial-opacity: 0.28;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.26), transparent 40%),
+        radial-gradient(circle at 78% 68%, rgba(96, 165, 250, 0.2), transparent 44%),
+        linear-gradient(140deg, #071321, #0b2540 52%, #10182f);
+}
+
+/* +3 — Blue Violet */
+body.streak-pos-3 {
+    --celestial-opacity: 0.34;
+    background-image:
+        radial-gradient(circle at 18% 25%, rgba(56, 189, 248, 0.28), transparent 38%),
+        radial-gradient(circle at 75% 65%, rgba(139, 92, 246, 0.23), transparent 43%),
+        linear-gradient(135deg, #081426, #172554 50%, #21163f);
+    animation-duration: 16s;
+}
+
+/* +4 — Violet Aurora */
+body.streak-pos-4 {
+    --celestial-opacity: 0.4;
+    background-image:
+        radial-gradient(circle at 25% 20%, rgba(129, 140, 248, 0.3), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(192, 132, 252, 0.24), transparent 42%),
+        linear-gradient(145deg, #0c1630, #261b4c 52%, #15152f);
+    animation-duration: 15s;
+}
+
+/* +5 — Cosmic Orchid */
+body.streak-pos-5 {
+    --celestial-opacity: 0.47;
+    background-image:
+        radial-gradient(circle at 15% 70%, rgba(56, 189, 248, 0.28), transparent 38%),
+        radial-gradient(circle at 72% 24%, rgba(217, 70, 239, 0.25), transparent 42%),
+        radial-gradient(circle at 78% 78%, rgba(244, 114, 182, 0.18), transparent 35%),
+        linear-gradient(135deg, #0b1730, #29194a 50%, #30172f);
+    animation-duration: 14s;
+}
+
+/* +6 — Magenta Nebula */
+body.streak-pos-6 {
+    --celestial-opacity: 0.54;
+    background-image:
+        radial-gradient(circle at 20% 25%, rgba(34, 211, 238, 0.3), transparent 38%),
+        radial-gradient(circle at 70% 25%, rgba(236, 72, 153, 0.27), transparent 40%),
+        radial-gradient(circle at 65% 78%, rgba(168, 85, 247, 0.24), transparent 40%),
+        linear-gradient(140deg, #0a1930, #321a4b 50%, #35142f);
+    animation:
+        positiveAuroraDrift 13s ease-in-out infinite alternate,
+        positiveGlowPulse 5s ease-in-out infinite alternate;
+}
+
+/* +7 — Colorful Cosmos */
+body.streak-pos-7 {
+    --celestial-opacity: 0.62;
+    background-image:
+        radial-gradient(circle at 16% 24%, rgba(34, 211, 238, 0.32), transparent 36%),
+        radial-gradient(circle at 82% 22%, rgba(251, 191, 36, 0.18), transparent 34%),
+        radial-gradient(circle at 72% 76%, rgba(236, 72, 153, 0.3), transparent 39%),
+        linear-gradient(135deg, #0a1b32, #31204f 48%, #401b3b);
+    animation:
+        positiveAuroraDrift 12s ease-in-out infinite alternate,
+        positiveGlowPulse 4.5s ease-in-out infinite alternate;
+}
+
+/* +8 — Neon Galaxy */
+body.streak-pos-8 {
+    --celestial-opacity: 0.7;
+    background-image:
+        radial-gradient(circle at 15% 30%, rgba(34, 211, 238, 0.35), transparent 36%),
+        radial-gradient(circle at 80% 20%, rgba(167, 139, 250, 0.32), transparent 38%),
+        radial-gradient(circle at 72% 78%, rgba(244, 114, 182, 0.32), transparent 38%),
+        linear-gradient(135deg, #071c33, #322052 47%, #481c3e);
+    animation:
+        positiveAuroraDrift 10s ease-in-out infinite alternate,
+        positiveGlowPulse 4s ease-in-out infinite alternate;
+}
+
+/* +9 — Celestial Prism */
+body.streak-pos-9 {
+    --celestial-opacity: 0.8;
+    background-image:
+        radial-gradient(circle at 14% 24%, rgba(103, 232, 249, 0.38), transparent 36%),
+        radial-gradient(circle at 82% 24%, rgba(196, 181, 253, 0.36), transparent 38%),
+        radial-gradient(circle at 74% 78%, rgba(251, 113, 133, 0.33), transparent 37%),
+        radial-gradient(circle at 25% 78%, rgba(250, 204, 21, 0.16), transparent 32%),
+        linear-gradient(135deg, #082039, #38235b 45%, #51203f);
+    animation:
+        positiveAuroraDrift 9s ease-in-out infinite alternate,
+        positiveGlowPulse 3.5s ease-in-out infinite alternate;
+}
+
+/* +10 — Full Celestial */
+body.streak-pos-10,
+body.mode-celestial {
+    --celestial-opacity: 1;
+    background-image:
+        radial-gradient(circle at 12% 22%, rgba(103, 232, 249, 0.42), transparent 35%),
+        radial-gradient(circle at 84% 18%, rgba(192, 132, 252, 0.4), transparent 38%),
+        radial-gradient(circle at 76% 80%, rgba(244, 114, 182, 0.38), transparent 37%),
+        radial-gradient(circle at 22% 82%, rgba(251, 191, 36, 0.2), transparent 32%),
+        linear-gradient(135deg, #08243f, #402660 44%, #5a2344);
+    animation:
+        positiveAuroraDrift 7s ease-in-out infinite alternate,
+        positiveGlowPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes positiveAuroraDrift {
     0% {
-        background-size: 100% auto;
+        background-position: 0% 35%;
+        background-size: 145% 145%;
     }
     100% {
-        background-size: 115% auto;
+        background-position: 100% 65%;
+        background-size: 165% 165%;
     }
 }
-@keyframes bgDrift {
-    0% {
-        background-size: 110% auto;
-        background-position: 0% 50%;
-    }
-    100% {
-        background-size: 125% auto;
-        background-position: 100% 50%;
-    }
-}
-@keyframes celestialColorShift {
-    0% {
-        filter: hue-rotate(0deg) brightness(1.1);
-    }
-    50% {
-        filter: hue-rotate(30deg) brightness(1.2);
-    }
-    100% {
-        filter: hue-rotate(0deg) brightness(1.1);
-    }
+
+@keyframes positiveGlowPulse {
+    0% { filter: brightness(1) saturate(1); }
+    100% { filter: brightness(1.08) saturate(1.12); }
 }
 
 /* ── NEGATIF BACKROOMS HORROR ── */
@@ -254,8 +327,8 @@ body.backrooms-lvl-10 {
     transition: opacity 0.8s ease;
 }
 
-body.mode-celestial #celestial-canvas {
-    opacity: 1;
+body[class*="streak-pos-"] #celestial-canvas {
+    opacity: var(--celestial-opacity, 0.25);
 }
 
 body.mode-celestial .celestial-bg {
@@ -1286,5 +1359,55 @@ body.backrooms-lvl-10 .horror-vignette {
     }
     .switch-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+
+/* ==========================================================
+   RESULT CELEBRATION & FAILURE STATE
+   ========================================================== */
+#celebration-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1400;
+}
+
+#result-modal.result-win .modal-card {
+    border-color: rgba(103, 232, 249, 0.8);
+    box-shadow:
+        0 0 45px rgba(56, 189, 248, 0.45),
+        0 0 90px rgba(192, 132, 252, 0.28);
+    animation: resultWinPop 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#result-modal.result-fail .modal-card {
+    border-color: rgba(248, 113, 113, 0.65);
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.28);
+    animation: resultFailShake 0.48s ease;
+}
+
+@keyframes resultWinPop {
+    0% { transform: scale(0.75); filter: brightness(1.7); }
+    65% { transform: scale(1.06); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes resultFailShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-9px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[class*="streak-pos-"],
+    #result-modal.result-win .modal-card,
+    #result-modal.result-fail .modal-card {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
     }
 }
