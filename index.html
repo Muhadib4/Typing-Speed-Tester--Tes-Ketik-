@@ -20,7 +20,7 @@
             <header class="header">
                 <div class="header-top">
                     <div class="brand">
-                        <h1>⚡ TypeSprint <span>ULTIMATE</span></h1>
+                        <h1>⚡ TypeSprint <span>COMBO FX</span></h1>
                     </div>
 
                     <div class="top-actions">
@@ -68,19 +68,35 @@
                 </div>
             </header>
 
-            <!-- INOVASI: COMBO STREAK BAR (ARCADE GAMING EFFECT) -->
-            <div class="combo-container" id="combo-container">
-                <div class="combo-info">
-                    <span class="combo-text" id="combo-text"
-                        >🔥 STREAK: <b id="combo-count">0</b></span
-                    >
-                    <span class="combo-multiplier" id="combo-multiplier"
-                        >1x</span
-                    >
+            <!-- INOVASI: DUAL STREAK PANEL (STREAK HURUF & STREAK KATA) -->
+            <div class="combo-panel">
+                <!-- Letter Streak -->
+                <div class="streak-badge letter-streak">
+                    <span class="streak-icon">🔤</span>
+                    <div class="streak-text-group">
+                        <span class="streak-title">Letter Streak</span>
+                        <span class="streak-num" id="letter-streak-val">0</span>
+                    </div>
                 </div>
-                <div class="combo-progress-bg">
-                    <div class="combo-progress-bar" id="combo-bar"></div>
+
+                <!-- Word Streak -->
+                <div class="streak-badge word-streak">
+                    <span class="streak-icon">📖</span>
+                    <div class="streak-text-group">
+                        <span class="streak-title">Word Streak</span>
+                        <span class="streak-num" id="word-streak-val">0</span>
+                    </div>
                 </div>
+
+                <!-- Multiplier Pill -->
+                <div class="multiplier-pill" id="combo-multiplier">
+                    1x MULTIPLIER
+                </div>
+            </div>
+
+            <!-- STREAK PROGRESS BAR -->
+            <div class="combo-progress-bg">
+                <div class="combo-progress-bar" id="combo-bar"></div>
             </div>
 
             <!-- STATS CARD -->
@@ -107,8 +123,14 @@
                 </div>
             </div>
 
-            <!-- TYPING BOX -->
+            <!-- TYPING BOX DENGAN FLOATING POPUP AREA -->
             <div class="typing-box" id="typing-box">
+                <!-- Wadah untuk animasi melayang kata sempurna -->
+                <div
+                    id="floating-feedback-container"
+                    class="floating-container"
+                ></div>
+
                 <input
                     type="text"
                     class="input-field"
@@ -137,18 +159,18 @@
                 <div class="modal-header">
                     <h3>🎛️ Audio & Switch Studio</h3>
                     <p class="modal-subtitle">
-                        Atur profil suara ketikan dan volume sesukamu
+                        Atur profil suara ketikan dan volume
                     </p>
                 </div>
 
                 <div class="audio-options">
-                    <!-- Master Toggle -->
                     <div class="setting-row">
-                        <label for="sound-toggle">Suara Keyboard:</label>
+                        <label for="sound-toggle"
+                            >Suara Keyboard & Chime:</label
+                        >
                         <input type="checkbox" id="sound-toggle" checked />
                     </div>
 
-                    <!-- Volume Slider -->
                     <div class="setting-row">
                         <label for="volume-slider"
                             >Volume: <span id="volume-val">80%</span></label
@@ -162,7 +184,6 @@
                         />
                     </div>
 
-                    <!-- Switch Type Selector -->
                     <div class="setting-group">
                         <label>Tipe Switch / Efek Suara:</label>
                         <div class="switch-grid">
@@ -195,7 +216,7 @@
         </div>
 
         <!-- =========================================================
-       MODAL HASIL AKHIR (GAME OVER & ANALYZER)
+       MODAL HASIL AKHIR
        ========================================================= -->
         <div class="modal-overlay" id="result-modal">
             <div class="modal-card">
@@ -220,19 +241,27 @@
                         <span class="stat-desc">CPM (Karakter/Menit)</span>
                     </div>
                     <div class="modal-stat-box">
-                        <span class="stat-num" id="modal-streak">0</span>
-                        <span class="stat-desc">Max Streak 🔥</span>
+                        <span class="stat-num" id="modal-letter-streak">0</span>
+                        <span class="stat-desc">Max Letter Streak 🔤</span>
+                    </div>
+                    <div class="modal-stat-box">
+                        <span class="stat-num" id="modal-word-streak">0</span>
+                        <span class="stat-desc">Max Word Streak 📖</span>
+                    </div>
+                    <div class="modal-stat-box">
+                        <span class="stat-num" id="modal-mistakes">0</span>
+                        <span class="stat-desc">Salah Ketik</span>
                     </div>
                 </div>
 
-                <!-- INOVASI: WEAK KEY ANALYZER -->
+                <!-- WEAK KEY ANALYZER -->
                 <div class="weak-keys-box" id="weak-keys-box">
                     <span class="weak-keys-title"
                         >🎯 Analisis Huruf Terlemah:</span
                     >
-                    <span class="weak-keys-list" id="weak-keys-list"
-                        >Sempurna! Tidak ada salah ketik.</span
-                    >
+                    <div class="weak-keys-list" id="weak-keys-list">
+                        Sempurna! Tidak ada salah ketik.
+                    </div>
                 </div>
 
                 <p id="modal-message" class="modal-message"></p>
