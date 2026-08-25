@@ -207,7 +207,7 @@ body.backrooms-lvl-10 {
     background-image:
         radial-gradient(
             circle at 50% 50%,
-            rgba(200, 0, 0, 0.3),
+            rgba(25, 0, 0, 0.3),
             rgba(0, 0, 0, 0.98)
         ),
         url("img/backroom\ lvl\ 10.jpg");
