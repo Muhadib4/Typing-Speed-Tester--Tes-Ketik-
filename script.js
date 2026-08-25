@@ -631,16 +631,35 @@ function updateStreakDimensionUI() {
 
     const t = i18n[currentLang];
 
-    // 1. RESET SEMUA KELAS BACKROOMS PADA BODY
+    // 1. BERSIHKAN SEMUA KELAS SEBELUMNYA
     bodyRoot.className = "";
     appContainer.classList.remove("celestial-10x-mode", "backrooms-corrupted");
     comboBar.classList.remove("bar-horror");
 
-    // 2. JIKA DI SISI POSITIF (+1 s/d +10)
+    // 2. SISI POSITIF (+1 s/d +10)
     if (multiplierLevel > 0) {
         letterStreakIcon.innerText = "🔤";
         wordStreakIcon.innerText = "📖";
         comboMultiplierTag.className = `multiplier-pill tier-pos-${multiplierLevel}`;
+
+        // Pasang kelas background setiap 2 level (2, 4, 6, 8, 10)
+        // Level 1 & 3 & 5 & 7 & 9: pakai background level sebelumnya (roundDown ke genap)
+        const bgLevel =
+            multiplierLevel >= 10
+                ? 10
+                : multiplierLevel >= 8
+                    ? 8
+                    : multiplierLevel >= 6
+                        ? 6
+                        : multiplierLevel >= 4
+                            ? 4
+                            : multiplierLevel >= 2
+                                ? 2
+                                : 0; // Level 1: tidak ada background khusus
+
+        if (bgLevel > 0) {
+            bodyRoot.classList.add(`streak-pos-${bgLevel}`);
+        }
 
         if (multiplierLevel === 10) {
             comboMultiplierTag.innerText = t.celestial10x;
@@ -656,7 +675,7 @@ function updateStreakDimensionUI() {
             comboBar.style.width = `${percent}%`;
         }
     }
-    // 3. JIKA DI SISI NEGATIF BACKROOMS HORROR (-1 s/d -10)
+    // 3. SISI NEGATIF BACKROOMS (-1 s/d -10)
     else {
         const horrorLvl = Math.abs(multiplierLevel);
         letterStreakIcon.innerText = "💀";
@@ -664,7 +683,7 @@ function updateStreakDimensionUI() {
         comboMultiplierTag.className = `multiplier-pill tier-neg-${horrorLvl}`;
         comboMultiplierTag.innerText = `-${horrorLvl}x ${t.backrooms} LVL ${horrorLvl}`;
 
-        // Aktifkan Efek Visual Backrooms pada Body & Container
+        // Pasang kelas background Backrooms (setiap 1 level -1, -2, ... -10)
         bodyRoot.classList.add(`backrooms-lvl-${horrorLvl}`);
         appContainer.classList.add("backrooms-corrupted");
         comboBar.classList.add("bar-horror");
