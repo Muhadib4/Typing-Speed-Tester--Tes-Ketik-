@@ -1,0 +1,257 @@
+/* ==========================================================
+1. RESET CSS & VARIABEL WARNA
+========================================================== */
+:root {
+    --bg-color: #0f172a; /* Latar belakang utama (Dark Slate) */
+    --card-bg: #1e293b; /* Latar belakang kartu/wadah */
+    --card-border: #334155; /* Garis tepi kartu */
+    --text-main: #f8fafc; /* Warna teks judul/utama */
+    --text-muted: #64748b; /* Warna teks keterangan/abu-abu */
+    --accent: #38bdf8; /* Warna aksen biru terang */
+    --accent-hover: #0284c7; /* Warna aksen saat tombol di-hover */
+    --char-default: #94a3b8; /* Warna huruf sebelum diketik */
+    --char-correct: #4ade80; /* Warna huruf jika diketik BENAR (Hijau) */
+    --char-incorrect: #f87171; /* Warna huruf jika diketik SALAH (Merah) */
+    --char-error-bg: rgba(
+        248,
+        113,
+        113,
+        0.2
+    ); /* Latar belakang huruf yang salah */
+    --cursor-color: #38bdf8; /* Warna garis kursor yang berkedip */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ==========================================================
+2. CONTAINER UTAMA
+========================================================== */
+.container {
+    width: 100%;
+    max-width: 850px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 35px 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* ==========================================================
+3. HEADER (Judul & Subjudul)
+========================================================== */
+.header {
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+}
+
+.header p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================================
+4. SCOREBOARD / KARTU STATISTIK
+========================================================== */
+.stats-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: rgba(30, 41, 59, 0.5);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
+    color: var(--accent);
+}
+
+/* ==========================================================
+5. AREA KETIK (TYPING BOX) & EFEK KARAKTER
+========================================================== */
+.typing-box {
+    position: relative;
+    background-color: rgba(15, 23, 42, 0.8);
+    border: 2px solid var(--card-border);
+    border-radius: 12px;
+    padding: 25px;
+    cursor: text;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    transition: border-color 0.2s ease;
+}
+
+/* Efek saat area ketik sedang fokus / aktif */
+.typing-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+/* Input tersembunyi (tetap menerima input keyboard) */
+.input-field {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 10;
+    cursor: text;
+}
+
+/* Teks bacaan */
+.text-display {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.25rem;
+    line-height: 1.8;
+    letter-spacing: 0.5px;
+    user-select: none;
+    word-break: break-word;
+}
+
+/* Status tiap karakter huruf */
+.char {
+    position: relative;
+    color: var(--char-default);
+    transition:
+        color 0.1s ease,
+        background-color 0.1s ease;
+}
+
+/* Huruf yang berhasil diketik dengan BENAR */
+.char.correct {
+    color: var(--char-correct);
+}
+
+/* Huruf yang SALAH ketik */
+.char.incorrect {
+    color: var(--char-incorrect);
+    background-color: var(--char-error-bg);
+    border-radius: 3px;
+}
+
+/* Kursor aktif pada huruf yang sedang dituju */
+.char.active {
+    color: var(--accent);
+    border-left: 2px solid var(--cursor-color);
+    animation: blink 1s infinite;
+}
+
+/* Animasi kedipan kursor */
+@keyframes blink {
+    0%,
+    100% {
+        border-left-color: var(--cursor-color);
+    }
+    50% {
+        border-left-color: transparent;
+    }
+}
+
+/* ==========================================================
+6. KONTROL & TOMBOL RESTART
+========================================================== */
+.controls {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-restart {
+    background-color: var(--accent);
+    color: #0f172a;
+    border: none;
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-restart:hover {
+    background-color: #7dd3fc;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.3);
+}
+
+.btn-restart:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================
+7. RESPONSIVE DESIGN (Tampilan Mobile)
+========================================================== */
+@media (max-width: 640px) {
+    .container {
+        padding: 20px 16px;
+    }
+
+    .header h1 {
+        font-size: 1.6rem;
+    }
+
+    .stats-card {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .text-display {
+        font-size: 1.05rem;
+        line-height: 1.6;
+    }
+
+    .typing-box {
+        padding: 16px;
+    }
+}

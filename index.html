@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Typing Speed Tester</title>
+        <!-- Google Fonts: Mengambil font modern Inter dan JetBrains Mono untuk tampilan teks koding/ketik -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+            rel="stylesheet"
+        />
+        <!-- Menghubungkan file CSS -->
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <!-- Header / Judul Aplikasi -->
+            <header class="header">
+                <h1>⚡ TypeSprint</h1>
+                <p>Uji kecepatan dan akurasi mengetikmu dalam 60 detik!</p>
+            </header>
+
+            <!-- Scoreboard / Papan Statistik Realtime -->
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-label">Sisa Waktu</span>
+                    <span class="stat-value" id="time-left">60s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">WPM</span>
+                    <span class="stat-value" id="wpm-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">CPM</span>
+                    <span class="stat-value" id="cpm-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Akurasi</span>
+                    <span class="stat-value" id="accuracy-value">100%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Salah Ketik</span>
+                    <span class="stat-value" id="mistakes-value">0</span>
+                </div>
+            </div>
+
+            <!-- Area Teks Uji Coba -->
+            <div class="typing-box" id="typing-box">
+                <!-- Input tersembunyi yang menangkap semua ketikan keyboard -->
+                <input
+                    type="text"
+                    class="input-field"
+                    id="input-field"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                />
+
+                <!-- Teks yang harus diketik pengguna akan di-render di sini oleh JavaScript -->
+                <p id="text-display" class="text-display"></p>
+            </div>
+
+            <!-- Tombol Kontrol / Aksi -->
+            <div class="controls">
+                <button id="restart-btn" class="btn-restart">
+                    🔄 Coba Lagi / Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Menghubungkan file JavaScript -->
+        <script src="script.js"></script>
+    </body>
+</html>
