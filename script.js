@@ -1,5 +1,5 @@
 // ==========================================================
-// 1. KUMPULAN PARAGRAF / KALIMAT LATIHAN
+// 1. KUMPULAN PARAGRAF LATIHAN
 // ==========================================================
 const paragraphs = [
     "Teknologi berkembang sangat cepat setiap harinya. Kemampuan mengetik dengan cepat dan akurat adalah salah satu keahlian dasar yang sangat berguna di era digital saat ini.",
@@ -10,7 +10,7 @@ const paragraphs = [
 ];
 
 // ==========================================================
-// 2. MENGAMBIL ELEMEN DARI HTML (DOM SELECTION)
+// 2. DOM SELECTION (MENGAMBIL ELEMEN HTML)
 // ==========================================================
 const textDisplay = document.getElementById("text-display");
 const inputField = document.getElementById("input-field");
@@ -22,28 +22,111 @@ const accuracyTag = document.getElementById("accuracy-value");
 const mistakesTag = document.getElementById("mistakes-value");
 const restartBtn = document.getElementById("restart-btn");
 
-// ==========================================================
-// 3. VARIABEL STATE (KONDISI PERMAINAN)
-// ==========================================================
-const MAX_TIME = 60; // Durasi tes dalam detik
-let timeLeft = MAX_TIME; // Sisa waktu yang berjalan
-let timer = null; // Menyimpan ID interval timer
-let charIndex = 0; // Posisi karakter yang sedang diketik
-let mistakes = 0; // Jumlah salah ketik
-let isTyping = false; // Penanda apakah pengetikan sudah dimulai
+// Elemen Fitur Baru
+const soundBtn = document.getElementById("sound-btn");
+const soundStatusTag = document.getElementById("sound-status");
+const highScoreValueTag = document.getElementById("high-score-value");
+const timeBtns = document.querySelectorAll(".time-btn");
+
+// Elemen Modal Hasil
+const resultModal = document.getElementById("result-modal");
+const modalWpm = document.getElementById("modal-wpm");
+const modalAccuracy = document.getElementById("modal-accuracy");
+const modalCpm = document.getElementById("modal-cpm");
+const modalMistakes = document.getElementById("modal-mistakes");
+const modalRankTitle = document.getElementById("modal-rank-title");
+const modalMessage = document.getElementById("modal-message");
+const modalRestartBtn = document.getElementById("modal-restart-btn");
 
 // ==========================================================
-// 4. FUNGSI: MEMUAT PARAGRAF BARU KE TAMPILAN
+// 3. VARIABEL STATE & AUDIO ENGINE
+// ==========================================================
+let maxTime = 60; // Durasi terpilih (default: 60s)
+let timeLeft = maxTime; // Sisa waktu berjalan
+let timer = null;
+let charIndex = 0;
+let mistakes = 0;
+let isTyping = false;
+let isSoundEnabled = true; // Status suara aktif / nonaktif
+
+// Inisialisasi Web Audio Context untuk Efek Suara Mekanik
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+// Fungsi menghasilkan suara klik mechanical keyboard secara sintetis
+function playKeySound(isError = false) {
+    if (!isSoundEnabled) return;
+    initAudio();
+    if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (isError) {
+        // Suara nada rendah jika salah ketik (thud / error)
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioCtx.currentTime + 0.08,
+        );
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+    } else {
+        // Suara 'click' switch mechanical keyboard (Blue/Brown switch effect)
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(
+            600 + Math.random() * 150,
+            audioCtx.currentTime,
+        );
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioCtx.currentTime + 0.04,
+        );
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+    }
+}
+
+// ==========================================================
+// 4. SISTEM HIGH SCORE (LOCAL STORAGE)
+// ==========================================================
+function loadHighScore() {
+    const savedHighScore = localStorage.getItem("typesprint_high_wpm") || 0;
+    highScoreValueTag.innerText = savedHighScore;
+    return parseInt(savedHighScore, 10);
+}
+
+function checkAndSaveHighScore(currentWpm) {
+    const currentHighScore = loadHighScore();
+    if (currentWpm > currentHighScore) {
+        localStorage.setItem("typesprint_high_wpm", currentWpm);
+        highScoreValueTag.innerText = currentWpm;
+        return true; // Berhasil pecah rekor baru!
+    }
+    return false;
+}
+
+// ==========================================================
+// 5. FUNGSI LOAD PARAGRAF
 // ==========================================================
 function loadParagraph() {
-    // Memilih satu paragraf secara acak dari array paragraphs
     const randomIndex = Math.floor(Math.random() * paragraphs.length);
     const selectedText = paragraphs[randomIndex];
 
-    // Kosongkan area tampilan teks sebelumnya
     textDisplay.innerHTML = "";
-
-    // Pecah teks menjadi array karakter, lalu bungkus tiap karakter dengan <span class="char">
     selectedText.split("").forEach((char) => {
         const span = document.createElement("span");
         span.className = "char";
@@ -51,178 +134,227 @@ function loadParagraph() {
         textDisplay.appendChild(span);
     });
 
-    // Beri kelas 'active' pada karakter pertama sebagai kursor awal
     const characters = textDisplay.querySelectorAll(".char");
     if (characters.length > 0) {
         characters[0].classList.add("active");
     }
 
-    // Fokuskan kursor keyboard ke input tersembunyi
     inputField.focus();
 }
 
 // ==========================================================
-// 5. FUNGSI: MENGHITUNG MUNDUR WAKTU (TIMER)
+// 6. TIMER & METRIK REALTIME
 // ==========================================================
 function initTimer() {
     if (timeLeft > 0) {
         timeLeft--;
         timeLeftTag.innerText = `${timeLeft}s`;
-
-        // Hitung WPM dan CPM setiap detik berjalan
         updateMetrics();
     } else {
-        // Jika waktu habis (0 detik), hentikan timer dan akhiri permainan
-        clearInterval(timer);
-        inputField.disabled = true;
-        removeActiveCursor();
+        finishGame();
     }
 }
 
-// ==========================================================
-// 6. FUNGSI: MENGHITUNG WPM, CPM, & AKURASI
-// ==========================================================
 function updateMetrics() {
-    // Waktu yang sudah berjalan (dalam detik)
-    const timeElapsed = MAX_TIME - timeLeft;
+    const timeElapsed = maxTime - timeLeft;
+    let wpm = 0;
+    let cpm = 0;
 
     if (timeElapsed > 0) {
-        // Total karakter yang benar
-        const correctChars = charIndex - mistakes;
-
-        // Standar internasional: 1 kata = 5 karakter
-        // Rumus WPM = (Karakter Benar / 5) / (Waktu Berlalu dalam Menit)
-        let wpm = Math.round(correctChars / 5 / (timeElapsed / 60));
-        // Jika nilai WPM negatif, 0, atau tidak valid, ubah jadi 0
+        const correctChars = Math.max(0, charIndex - mistakes);
+        wpm = Math.round(correctChars / 5 / (timeElapsed / 60));
         wpm = wpm < 0 || !wpm || wpm === Infinity ? 0 : wpm;
         wpmTag.innerText = wpm;
 
-        // Rumus CPM = Karakter Benar / (Waktu Berlalu dalam Menit)
-        let cpm = Math.round(correctChars / (timeElapsed / 60));
+        cpm = Math.round(correctChars / (timeElapsed / 60));
         cpm = cpm < 0 || !cpm || cpm === Infinity ? 0 : cpm;
         cpmTag.innerText = cpm;
     }
 
-    // Rumus Akurasi = (Karakter Benar / Total Karakter yang sudah diketik) * 100%
+    let accuracy = 100;
     if (charIndex > 0) {
         const correctChars = Math.max(0, charIndex - mistakes);
-        const accuracy = Math.round((correctChars / charIndex) * 100);
+        accuracy = Math.round((correctChars / charIndex) * 100);
         accuracyTag.innerText = `${accuracy}%`;
     } else {
         accuracyTag.innerText = "100%";
     }
 
-    // Update jumlah kesalahan ketik
     mistakesTag.innerText = mistakes;
+    return { wpm, cpm, accuracy };
 }
 
-// ==========================================================
-// 7. FUNGSI: MENGHAPUS SEMUA KURSOR AKTIF
-// ==========================================================
 function removeActiveCursor() {
     const characters = textDisplay.querySelectorAll(".char");
     characters.forEach((char) => char.classList.remove("active"));
 }
 
 // ==========================================================
-// 8. FUNGSI: LOGIKA UTAMA SAAT PENGGUNA MENGETIK
+// 7. MENANGANI KETIKAN PENGGUNA
 // ==========================================================
 function handleTyping() {
     const characters = textDisplay.querySelectorAll(".char");
     const typedValue = inputField.value.split("");
     const currentTypedChar = typedValue[charIndex];
 
-    // Jalankan timer saat ketikan pertama dimulai
     if (!isTyping) {
         timer = setInterval(initTimer, 1000);
         isTyping = true;
     }
 
-    // Cek apakah pengguna menekan tombol Backspace (menghapus)
+    // Pengguna menekan Backspace (menghapus)
     if (typedValue.length < charIndex) {
         if (charIndex > 0) {
             charIndex--;
-            // Jika karakter yang dihapus sebelumnya salah, kurangi jumlah mistake
             if (characters[charIndex].classList.contains("incorrect")) {
                 mistakes--;
             }
-            // Hapus kelas benar/salah pada huruf yang dihapus
             characters[charIndex].classList.remove("correct", "incorrect");
+            playKeySound(false);
         }
     }
-    // Jika pengguna mengetik karakter baru
+    // Pengguna mengetik karakter baru
     else if (charIndex < characters.length && timeLeft > 0) {
         const expectedChar = characters[charIndex].innerText;
 
         if (currentTypedChar === expectedChar) {
             characters[charIndex].classList.add("correct");
             characters[charIndex].classList.remove("incorrect");
+            playKeySound(false); // Suara klik normal
         } else {
             mistakes++;
             characters[charIndex].classList.add("incorrect");
             characters[charIndex].classList.remove("correct");
+            playKeySound(true); // Suara error thud
         }
 
         charIndex++;
     }
 
-    // Pindahkan indikator kursor (.active) ke karakter selanjutnya
+    // Pindahkan kursor
     removeActiveCursor();
     if (charIndex < characters.length && timeLeft > 0) {
         characters[charIndex].classList.add("active");
     } else if (charIndex >= characters.length) {
-        // Jika semua kalimat sudah selesai diketik sebelum waktu habis
-        clearInterval(timer);
-        inputField.disabled = true;
+        finishGame();
     }
 
-    // Perbarui metrik skor secara langsung
     updateMetrics();
 }
 
 // ==========================================================
-// 9. FUNGSI: RESET PERMAINAN
+// 8. SELESAI PERMAINAN & MODAL HASIL (GAME OVER)
+// ==========================================================
+function finishGame() {
+    clearInterval(timer);
+    inputField.disabled = true;
+    removeActiveCursor();
+
+    const finalStats = updateMetrics();
+    const isNewRecord = checkAndSaveHighScore(finalStats.wpm);
+
+    // Tentukan Peringkat / Gelar berdasarkan WPM
+    let rankTitle = "";
+    let rankMessage = "";
+
+    if (finalStats.wpm >= 90) {
+        rankTitle = "⚡ Dewa Ketik!";
+        rankMessage =
+            "Kecepatan jarimu luar biasa spektakuler setara profesional esports!";
+    } else if (finalStats.wpm >= 70) {
+        rankTitle = "🚀 Master Ketik";
+        rankMessage =
+            "Kecepatanmu sangat mengesankan di atas rata-rata pengguna umum!";
+    } else if (finalStats.wpm >= 50) {
+        rankTitle = "🚗 Pengetik Mahir";
+        rankMessage =
+            "Kerja bagus! Kecepatan mengetikmu sudah sangat lancar dan produktif.";
+    } else if (finalStats.wpm >= 30) {
+        rankTitle = "🚲 Tingkat Menengah";
+        rankMessage =
+            "Kemampuan yang solid! Terus berlatih untuk meningkatkan akurasi dan ritme.";
+    } else {
+        rankTitle = "🐢 Pengetik Pemula";
+        rankMessage =
+            "Awal yang baik! Luangkan waktu latihan 5 menit setiap hari untuk hasil maksimal.";
+    }
+
+    if (isNewRecord && finalStats.wpm > 0) {
+        rankMessage +=
+            " 🎉 SELAMAT! Kamu berhasil memecahkan Rekor Terbaik baru!";
+    }
+
+    // Isi data ke dalam modal popup
+    modalWpm.innerText = finalStats.wpm;
+    modalAccuracy.innerText = `${finalStats.accuracy}%`;
+    modalCpm.innerText = finalStats.cpm;
+    modalMistakes.innerText = mistakes;
+    modalRankTitle.innerText = rankTitle;
+    modalMessage.innerText = rankMessage;
+
+    // Tampilkan modal
+    resultModal.classList.add("show");
+}
+
+// ==========================================================
+// 9. RESET GAME
 // ==========================================================
 function resetGame() {
-    // Hentikan timer yang sedang berjalan
     clearInterval(timer);
+    resultModal.classList.remove("show"); // Sembunyikan modal
 
-    // Reset semua variabel state ke nilai awal
-    timeLeft = MAX_TIME;
+    timeLeft = maxTime;
     charIndex = 0;
     mistakes = 0;
     isTyping = false;
     timer = null;
 
-    // Aktifkan kembali input field dan bersihkan isinya
     inputField.disabled = false;
     inputField.value = "";
 
-    // Reset teks tampilan skor di HTML
-    timeLeftTag.innerText = `${MAX_TIME}s`;
+    timeLeftTag.innerText = `${maxTime}s`;
     wpmTag.innerText = "0";
     cpmTag.innerText = "0";
     accuracyTag.innerText = "100%";
     mistakesTag.innerText = "0";
 
-    // Muat paragraf baru
     loadParagraph();
 }
 
 // ==========================================================
-// 10. EVENT LISTENERS (MENGHUBUNGKAN AKSI PENGGUNA)
+// 10. EVENT LISTENERS
 // ==========================================================
 
-// 1. Dengarkan setiap input ketikan pada input field
+// Input ketikan & area klik
 inputField.addEventListener("input", handleTyping);
-
-// 2. Jika area kotak teks diklik di mana saja, otomatis fokuskan ke input
 typingBox.addEventListener("click", () => inputField.focus());
 
-// 3. Jika tombol Restart diklik, jalankan fungsi resetGame
+// Tombol Reset utama dan tombol coba lagi di modal
 restartBtn.addEventListener("click", resetGame);
+modalRestartBtn.addEventListener("click", resetGame);
+
+// Toggle Suara Mechanical Keyboard
+soundBtn.addEventListener("click", () => {
+    isSoundEnabled = !isSoundEnabled;
+    soundStatusTag.innerText = isSoundEnabled ? "ON" : "OFF";
+    soundBtn.style.opacity = isSoundEnabled ? "1" : "0.6";
+});
+
+// Pemilihan Durasi Waktu (15s, 30s, 60s)
+timeBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        // Hapus kelas active dari tombol lain
+        timeBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // Ambil waktu dari atribut data-time
+        maxTime = parseInt(btn.getAttribute("data-time"), 10);
+        resetGame();
+    });
+});
 
 // ==========================================================
-// 11. INISIALISASI PERTAMA KALI KETIKA HALAMAN DIBUKA
+// 11. INISIALISASI SAAT HALAMAN DIBUKA
 // ==========================================================
+loadHighScore();
 loadParagraph();
