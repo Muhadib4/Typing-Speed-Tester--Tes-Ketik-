@@ -625,6 +625,158 @@ function deductDimensionPoints(penalty = 3) {
     updateStreakDimensionUI();
 }
 
+/* ==========================================================
+   GALAXY CANVAS — KHUSUS CELESTIAL STREAK +10X
+   ========================================================== */
+const celestialCanvas = document.getElementById("celestial-canvas");
+const celestialCtx = celestialCanvas?.getContext("2d");
+
+let celestialStars = [];
+let celestialMeteors = [];
+let celestialAnimationId = null;
+let celestialCanvasActive = false;
+let celestialPointer = {
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+};
+
+function resizeCelestialCanvas() {
+    if (!celestialCanvas || !celestialCtx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    celestialCanvas.width = Math.floor(window.innerWidth * dpr);
+    celestialCanvas.height = Math.floor(window.innerHeight * dpr);
+    celestialCanvas.style.width = `${window.innerWidth}px`;
+    celestialCanvas.style.height = `${window.innerHeight}px`;
+    celestialCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    createCelestialParticles();
+}
+
+function createCelestialParticles() {
+    const starCount = Math.min(
+        220,
+        Math.max(100, Math.floor((window.innerWidth * window.innerHeight) / 6500)),
+    );
+
+    celestialStars = Array.from({ length: starCount }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        size: Math.random() * 1.8 + 0.25,
+        speed: Math.random() * 0.018 + 0.004,
+        alpha: Math.random() * 0.65 + 0.25,
+        twinkle: Math.random() * Math.PI * 2,
+    }));
+
+    celestialMeteors = Array.from({ length: 2 }, () => createCelestialMeteor(true));
+}
+
+function createCelestialMeteor(randomStart = false) {
+    return {
+        x: Math.random() * window.innerWidth,
+        y: randomStart ? Math.random() * window.innerHeight : -120,
+        speed: Math.random() * 5 + 5,
+        length: Math.random() * 80 + 65,
+        delay: randomStart ? Math.random() * 180 : Math.random() * 260 + 100,
+    };
+}
+
+function drawCelestialCanvas() {
+    if (!celestialCanvasActive || !celestialCtx) return;
+
+    celestialCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    const offsetX =
+        (celestialPointer.x - window.innerWidth / 2) / window.innerWidth;
+    const offsetY =
+        (celestialPointer.y - window.innerHeight / 2) / window.innerHeight;
+
+    celestialStars.forEach((star) => {
+        star.x -= offsetX * star.speed * 10;
+        star.y -= offsetY * star.speed * 10;
+        star.twinkle += 0.025;
+
+        if (star.x < -5) star.x = window.innerWidth + 5;
+        if (star.x > window.innerWidth + 5) star.x = -5;
+        if (star.y < -5) star.y = window.innerHeight + 5;
+        if (star.y > window.innerHeight + 5) star.y = -5;
+
+        const glow = Math.max(
+            0.15,
+            star.alpha + Math.sin(star.twinkle) * 0.18,
+        );
+        celestialCtx.beginPath();
+        celestialCtx.fillStyle = `rgba(255, 255, 255, ${glow})`;
+        celestialCtx.shadowColor = "rgba(125, 211, 252, 0.85)";
+        celestialCtx.shadowBlur = star.size * 5;
+        celestialCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        celestialCtx.fill();
+    });
+
+    celestialCtx.shadowBlur = 0;
+
+    celestialMeteors.forEach((meteor, index) => {
+        if (meteor.delay > 0) {
+            meteor.delay--;
+            return;
+        }
+
+        const gradient = celestialCtx.createLinearGradient(
+            meteor.x,
+            meteor.y,
+            meteor.x + meteor.length,
+            meteor.y - meteor.length,
+        );
+        gradient.addColorStop(0, "rgba(255, 255, 255, 0.9)");
+        gradient.addColorStop(1, "rgba(125, 211, 252, 0)");
+
+        celestialCtx.beginPath();
+        celestialCtx.strokeStyle = gradient;
+        celestialCtx.lineWidth = 1.4;
+        celestialCtx.moveTo(meteor.x, meteor.y);
+        celestialCtx.lineTo(
+            meteor.x + meteor.length,
+            meteor.y - meteor.length,
+        );
+        celestialCtx.stroke();
+
+        meteor.x -= meteor.speed;
+        meteor.y += meteor.speed;
+
+        if (meteor.y > window.innerHeight + meteor.length || meteor.x < -meteor.length) {
+            celestialMeteors[index] = createCelestialMeteor();
+        }
+    });
+
+    celestialAnimationId = requestAnimationFrame(drawCelestialCanvas);
+}
+
+function setCelestialCanvasActive(active) {
+    if (!celestialCanvas || !celestialCtx || celestialCanvasActive === active) {
+        return;
+    }
+
+    celestialCanvasActive = active;
+
+    if (active) {
+        resizeCelestialCanvas();
+        drawCelestialCanvas();
+    } else {
+        cancelAnimationFrame(celestialAnimationId);
+        celestialAnimationId = null;
+        celestialCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+}
+
+window.addEventListener("resize", () => {
+    if (celestialCanvasActive) resizeCelestialCanvas();
+});
+
+window.addEventListener("pointermove", (event) => {
+    celestialPointer.x = event.clientX;
+    celestialPointer.y = event.clientY;
+});
+
 function updateStreakDimensionUI() {
     letterStreakVal.innerText = letterStreak;
     wordStreakVal.innerText = wordStreak;
@@ -633,6 +785,7 @@ function updateStreakDimensionUI() {
 
     // 1. BERSIHKAN SEMUA KELAS SEBELUMNYA
     bodyRoot.className = "";
+    setCelestialCanvasActive(false);
     appContainer.classList.remove("celestial-10x-mode", "backrooms-corrupted");
     comboBar.classList.remove("bar-horror");
 
@@ -664,6 +817,7 @@ function updateStreakDimensionUI() {
         if (multiplierLevel === 10) {
             comboMultiplierTag.innerText = t.celestial10x;
             bodyRoot.classList.add("mode-celestial");
+            setCelestialCanvasActive(true);
             appContainer.classList.add("celestial-10x-mode");
             comboBar.style.width = "100%";
         } else {
